@@ -1,7 +1,7 @@
 "use strict"
 
 const fs = require('fs');
-const helper = require('./helper.js');
+const helper = require('./lib/helper.js');
 const {resolve} = require('path');
 
 (async () => {

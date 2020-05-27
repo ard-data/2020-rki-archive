@@ -1,8 +1,8 @@
 "use strict"
 
 const fs = require('fs');
-const helper = require('./helper.js');
-const config = require('./config.js');
+const helper = require('./lib/helper.js');
+const config = require('./lib/config.js');
 const {resolve} = require('path');
 
 const pathIn  = resolve(__dirname, '../data/0_archived');

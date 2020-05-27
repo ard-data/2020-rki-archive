@@ -15,10 +15,10 @@
 	- 1_download.js ist der API Scraper, der bei uns stündlich läuft
 	- 2_deduplicate.sh löscht doppelte Dateien
 	- 3_parse.js parsed die API- und CSV-Rohdaten und macht daraus sauberes und einheitliches JSON
-	- 4_scan.js ist ein kleines Demo, wie man alle geparsten Daten einmal durchscannen kann
-	- config.js enthält einen Überblick über alle Felder
-	- helper.js sind die kleinen Helferlein
-	- cronjob.sh ist das cronjob script
+	- cronjob.sh ist das stündliche cronjob script
+	- lib/config.js enthält einen Überblick über alle Felder
+	- lib/helper.js sind die kleinen Helferlein
+	- example_scan.js ist ein kleines Demo, wie man alle geparsten Daten einmal durchscannen kann
 - Datenfelder:
 	- Siehe npgeo
 	- Datumsangaben sind eine Katastrophe. Da ist alles dabei. Auch Fälle, wo sich Leute bereits 1956 infiziert haben
