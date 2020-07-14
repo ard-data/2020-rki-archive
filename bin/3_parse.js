@@ -204,6 +204,11 @@ function cleanupDates(obj) {
 					break;
 				}
 
+				if (/^2020\/\d{2}\/\d{2} 00:00:00$/.test(result)) {
+					result = Date.parse(result);
+					break;
+				}
+
 				if (/^\d\d\.\d\d\.20\d\d,? 00:00( Uhr)?$/.test(result)) {
 					result = result.split(/[^0-9]+/);
 					result = result[2]+'-'+result[1]+'-'+result[0]+'T00:00:00Z';
