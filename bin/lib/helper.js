@@ -28,10 +28,13 @@ function fetch(url) {
 			let buf = [];
 			response.on('data', data => buf.push(data));
 			response.on('end', () => resolve(Buffer.concat(buf)));
+			response.on('error', data => buf.push(data));
 			if (response.statusCode !== 200) {
 				console.log(response);
 				throw Error();
 			}
+		}).on('error', error => {
+			throw Error(error)
 		})
 	});
 }
