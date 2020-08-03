@@ -42,6 +42,27 @@ Der Code läuft aktuell nur unter UNIX-Betriebssystemen, also z.B. Linux/Mac OS.
 - `bin/lib/helper.js` sind die kleinen Helferlein, die man so braucht.
 - `bin/example_scan.js` ist ein kleines Demo-Script, das zeigt, wie man alle geparsten Daten einmal durchscannen kann.
 
+## Beispiele
+
+### Node.js
+
+`bin/example_scan.js` ist, wie erwähnt, ein kleines Demo-Script.
+
+### Shell
+
+Die Daten kann man relativ leicht auf der Shell parsen und filtern. Beispiel:
+
+`bzip2 -dkcq *.json.bz2 | jq -r '.[] | select (.IdLandkreis == "09162" and .Altersgruppe == "A05-A14") | [.Geschlecht, .AnzahlFall, .NeuerFall, .MeldedatumISO, .DatenstandISO, .RefdatumISO] | @tsv'`
+
+Der Befehl besteht aus den folgenden Teilen:
+
+- `bzip2 -dkcq *.json.bz2 | `  
+Dekomprimiere alle Dateien (`-d`), die auf `.json.bz2` enden und pipe die Ergebnisse (`-c`) weiter.
+- `jq -r '`…`'`  
+Mit [jq](https://stedolan.github.io/jq/) kann man sehr effizient JSON verarbeiten. Die [Query- und Filtermöglichkeiten sind gut dokumentiert](https://stedolan.github.io/jq/manual/#Basicfilters).
+- `.[] | select (.IdLandkreis == "09162" and .Altersgruppe == "A05-A14") | [.Geschlecht, .AnzahlFall, .NeuerFall, .MeldedatumISO, .DatenstandISO, .RefdatumISO] | @tsv'`  
+Alle bekannten COVID19-Fälle aus dem Stadtkreis München (`.IdLandkreis == "09162"`), mit Patient_innen im Schulalter (`.Altersgruppe == "A05-A14"`) sollen als Tab-separierte Datei (`| @tsv`) exportiert werden, mit den 6 Spalten: Geschlecht, AnzahlFall, NeuerFall, MeldedatumISO, DatenstandISO, RefdatumISO
+
 ## weitere Ideen
 
 - Man könnte einen tieferen Plausibilitäts-Check durchführen.
