@@ -160,18 +160,23 @@ function checkData(data) {
 				delete obj[key];
 				return;
 			}
-			if (!config.checkField(key, obj[key])) throw Error('field check failed: key "'+key+'", value "'+obj[key]+'"');
+			if (!config.checkField(key, obj[key])) error('field check failed: key "'+key+'", value "'+obj[key]+'"');
 		});
 		
 		config.mandatoryList.forEach(keyMandatory => {
-			if (!keysLookup.has(keyMandatory)) throw new Error('mandatory key missing: "'+keyMandatory+'" in Object "'+JSON.stringify(obj)+'"');
+			if (!keysLookup.has(keyMandatory)) error('mandatory key missing: "'+keyMandatory+'" in Object "'+JSON.stringify(obj)+'"');
 			keysLookup.delete(keyMandatory);
 		})
 
 		Array.from(keysLookup.keys()).forEach(key => {
-			if (!config.optionalSet.has(key)) throw new Error('key is not known: "'+key+'"');
+			if (!config.optionalSet.has(key)) error('key is not known: "'+key+'"');
 		})
 	})
+
+	function error(text) {
+		console.error(text);
+		throw Error();
+	}
 }
 
 async function saveData(data, filenameOut) {
