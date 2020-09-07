@@ -121,7 +121,8 @@ async function openCsvDump(filenameIn) {
 		if (defined('AnzahlGenesen')) obj.AnzahlGenesen = parseInt(obj.AnzahlGenesen, 10);
 		if (defined('NeuGenesen')) obj.NeuGenesen = parseInt(obj.NeuGenesen, 10);
 		if (defined('IstErkrankungsbeginn')) obj.IstErkrankungsbeginn = parseInt(obj.IstErkrankungsbeginn, 10);
-		while (obj.IdLandkreis.length < 5) obj.IdLandkreis = '0'+obj.IdLandkreis;
+
+		if (obj.IdLandkreis === '0-1') obj.IdLandkreis = '-1';
 
 		if (defined('Referenzdatum')) obj.Refdatum = obj.Referenzdatum;
 
