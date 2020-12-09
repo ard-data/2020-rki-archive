@@ -3,5 +3,8 @@
   "version": "1.0.0",
   "description": "RKI corona data archive",
   "author": "Michael Kreil (BR)",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "colors": "^1.4.0"
+  }
 }
