@@ -17,32 +17,97 @@ const files0 = scanFolder(path0);
 const files2 = scanFolder(path2);
 
 (async () => {
-	console.log('   find archived, but not parsed');
-	minus(files0, files2).forEach(f => console.log(colors.red('mv "'+f.fullname+'" "'+path1+'"')));
+	console.log('   find archived, but not parsed'.grey);
+	minus(files0, files2).forEach(f => console.log(colors.yellow('git mv "'+f.fullname+'" "'+path1+'"')));
 
-	console.log('   find parsed, but not archived');
-	minus(files2, files0).forEach(f => console.log(colors.red(f.filename)));
+	console.log('   find parsed, but not archived'.grey);
+	minus(files2, files0).forEach(f => console.log(colors.yellow('rm "'+f.fullname+'"')));
 
+	console.log('   find duplicated days in archived'.grey);
+	await scanObjectIds(files2);
+	duplicatedDays(files2).forEach(entry => {
+		console.log(colors.white(entry.day));
+		entry.files.forEach(file => {
+			console.log(colors.red('   '+[file.filename, file.entryCount, file.size].join('\t')));
+		})
+	});
 })()
 
 function scanFolder(path) {
 	let files = fs.readdirSync(path).filter(f => f.endsWith('.bz2'));
-	files = files.map(f => ({
-		filename: f,
-		fullname: resolve(path,f),
-		timestamp: f.match(/\d\d\d\d-\d\d-\d\d-\d\d-\d\d/)[0],
-	}))
-	return files;
-}
+	files = files.map(filename => {
+		let timestamp = filename.match(/\d\d\d\d-\d\d-\d\d-\d\d-\d\d/)[0];
+		if (!timestamp) throw Error();
 
-function throwError(err) {
-	throw Error(err);
+		let fullname = resolve(path,filename)
+
+		return {
+			filename,
+			fullname,
+			timestamp,
+			day: timestamp.slice(0,10),
+			size: fs.statSync(fullname).size
+		}
+	})
+	files = files.sort((a,b) => a.filename < b.filename ? -1 : 1);
+	return files;
 }
 
 function minus(list1, list2) {
 	list2 = new Set(list2.map(f => f.timestamp));
 	list1 = list1.filter(f => !list2.has(f.timestamp));
 	return list1;
+}
+
+function duplicatedDays(list) {
+	let dayLookup = new Map();
+	list.forEach(f => {
+		if (!dayLookup.has(f.day)) return dayLookup.set(f.day, {day:f.day, files:[f]});
+		dayLookup.get(f.day).files.push(f);
+	});
+	dayLookup = Array.from(dayLookup.values());
+	dayLookup = dayLookup.filter(e => e.files.length > 1);
+	return dayLookup;
+}
+
+async function scanObjectIds(files) {
+	for (let file of files) {
+		file.intervals = await getObjectIds(file);
+		file.entryCount = file.intervals.reduce((sum, interval) => sum + interval[1] - interval[0]+1, 0);
+	}
+
+	async function getObjectIds(file) {
+		let cacheFile = resolve(path4, file.timestamp+'.json');
+
+		if (fs.existsSync(cacheFile)) return JSON.parse(fs.readFileSync(cacheFile))
+
+		console.log(('      scan '+file.filename).grey);
+		let data = fs.readFileSync(file.fullname);
+		data = await helper.bunzip2(data);
+		data = data.toString('utf8');
+		data = JSON.parse(data);
+		data = data.map(e => e.ObjectId);
+		data = condense(data);
+		fs.writeFileSync(cacheFile, Buffer.from(JSON.stringify(data)))
+
+		return data;
+
+		function condense(list) {
+			list.sort((a,b) => a-b);
+
+			let lastEntry = false;
+			let entries = [];
+			list.forEach(id => {
+				if (lastEntry && (lastEntry[1]+1 === id)) {
+					lastEntry[1] = id;
+				} else {
+					lastEntry = [id, id];
+					entries.push(lastEntry);
+				}
+			})
+			return entries;
+		}
+	}
 }
 /*
 
@@ -80,22 +145,6 @@ let lookup = new Map();
 		console.log('   save');
 		data = Buffer.from(JSON.stringify(data));
 		fs.writeFileSync(filenameSum, data)
-	}
-
-	function condense(list) {
-		list.sort();
-
-		let lastEntry = false;
-		let entries = [];
-		list.forEach(id => {
-			if (lastEntry && (lastEntry[1]+1 === id)) {
-				lastEntry[1] = id;
-			} else {
-				lastEntry = [id, id];
-				entries.push(lastEntry);
-			}
-		})
-		return entries;
 	}
 
 	lookup = Array.from(lookup.values());
