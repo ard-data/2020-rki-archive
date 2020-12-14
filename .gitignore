@@ -2,3 +2,4 @@
 /bin/z_*
 /data/z_*
 /node_modules/
+.DS_Store
