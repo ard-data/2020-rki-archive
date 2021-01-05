@@ -3,6 +3,7 @@
 source ~/.profile
 
 set -e
+set -x
 cd "$(dirname "$0")"
 
 git pull
