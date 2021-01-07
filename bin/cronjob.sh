@@ -17,3 +17,5 @@ sleep 3
 git add ../data/
 git commit -m "automatic data update" || exit 0
 git push
+
+exit 42
