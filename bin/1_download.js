@@ -15,7 +15,7 @@ const {resolve} = require('path');
 	let count = 0;
 	let data;
 	do {
-		process.stderr.write(page+' ');
+		process.stderr.write('.');
 		let url = 'https://services7.arcgis.com/mOBPykOjAyBO2ZKk/arcgis/rest/services/RKI_COVID19/FeatureServer/0/query?where=1%3D1&outFields=*&orderByFields=ObjectId%20ASC&resultOffset='+(page*pageSize)+'&resultRecordCount='+pageSize+'&f=json';
 		data = await helper.fetch(url);
 		try {
