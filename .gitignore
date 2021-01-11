@@ -1,5 +1,6 @@
 
+.DS_Store
 /bin/z_*
+/data/monthly_archive/*.tar
 /data/z_*
 /node_modules/
-.DS_Store
