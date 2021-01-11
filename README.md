@@ -20,9 +20,12 @@ Daher haben wir allerhand alte Daten-Versionen gesammelt und stellen sie in dies
 - Fehlerhafte Rohdaten werden nach `data/1_ignored` verschoben, z.B. wenn durch technische Probleme nur die halbe CSV-Datei zum Download stand.
 - Gesäuberte Daten landen täglich als JSON unter `data/2_parsed`.
 
+### alte Daten werden extern archiviert
+
 Mit Ausbruch der 2. Welle ist die Datenmenge enorm gestiegen und würde langfristig mehrere Gigabytes benötigen. Daher werden die alte Datenbestände als monatliche TAR-Archive nach extern ausgelagert. Sie sind zu finden unter:
 - [Dropbox](https://www.dropbox.com/sh/8dz0gm2es9ppiej/AAAe8Plyx9XHWeQOrRM4C_tga?lst=)
 - [Nextcloud](https://share.ard-zdf-box.de/s/brLC55gjMerNDAK)
+
 Als Kontrollmöglichkeit gibt es die Hashwerte der Archive als MD5, SHA1 und SHA256 unter `data/monthly_archive`.
 
 ### Datenfelder:
