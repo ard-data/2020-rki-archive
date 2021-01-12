@@ -1,6 +1,8 @@
 
 .DS_Store
 /bin/z_*
+/data/0_archived/2020-*
+/data/2_parsed/data_2020-*
 /data/monthly_archive/*.tar
 /data/z_*
 /node_modules/
