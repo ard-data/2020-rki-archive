@@ -28,25 +28,21 @@ let filesIn = fs.readdirSync(pathIn).filter(f => f.endsWith('.bz2'));
 		let type = fileIn.replace(timestamp,'?');
 		let data;
 
-		try {
-			switch (type) {
-				case '?_api_raw.json.bz2':
-					data = await openApiRaw(filenameIn);
-				break;
-				case '?_dump.csv.bz2':
-					data = await openCsvDump(filenameIn);
-				break;
-				default: throw Error(`unknown type "${type}"`)
-			}
-
-			data.forEach(cleanupDates);
-			
-			checkData(data);
-
-			await saveData(data, filenameOut);
-		} catch (e) {
-			
+		switch (type) {
+			case '?_api_raw.json.bz2':
+				data = await openApiRaw(filenameIn);
+			break;
+			case '?_dump.csv.bz2':
+				data = await openCsvDump(filenameIn);
+			break;
+			default: throw Error(`unknown type "${type}"`)
 		}
+
+		data.forEach(cleanupDates);
+		
+		checkData(data);
+
+		await saveData(data, filenameOut);
 	}
 })()
 
