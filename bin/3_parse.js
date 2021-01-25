@@ -17,7 +17,7 @@ let filesIn = fs.readdirSync(pathIn).filter(f => f.endsWith('.bz2'));
 		let timestamp = fileIn.match(/\d\d\d\d-\d\d-\d\d-\d\d-\d\d/);
 		if (!timestamp) throw Error();
 
-		let fileOut = `data_${timestamp[0]}.json.bz2`;
+		let fileOut = `data_${timestamp[0]}.ndjson.xz`;
 
 		let filenameIn  = resolve(pathIn,  fileIn);
 		let filenameOut = resolve(pathOut, fileOut);
@@ -177,9 +177,12 @@ function checkData(data) {
 }
 
 async function saveData(data, filenameOut) {
+	console.log('   stringify');
+	data = data.map(e => Buffer.from(JSON.stringify(e)+'\n'));
+	data = Buffer.concat(data);
+
 	console.log('   compress');
-	data = JSON.stringify(data);
-	data = await helper.bzip2(data);
+	data = await helper.xzip(data);
 
 	console.log('   save');
 	await fs.promises.writeFile(filenameOut, data);
