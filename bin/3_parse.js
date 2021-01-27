@@ -21,7 +21,7 @@ let filesIn = fs.readdirSync(pathIn).filter(f => f.endsWith('.xz'));
 
 		let filenameIn  = resolve(pathIn,  fileIn);
 		let filenameOut = resolve(pathOut, fileOut);
-		let filenameTmp = resolve(pathOut, 'temp.xz');
+		let filenameTmp = resolve(__dirname,'../data/'+((new Date()).toISOString()+'.tmp');
 
 		if (fs.existsSync(filenameOut)) continue;
 

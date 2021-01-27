@@ -15,7 +15,9 @@ const {resolve} = require('path');
 	let data;
 
 	let date = (new Date()).toISOString().slice(0,16).replace(/[^0-9]/g,'-');
-	let xz = helper.lineXzipWriter(resolve(__dirname,'../data/0_archived/'+date+'_api_raw.ndjson.xz'));
+	let filenameOut = resolve(__dirname,'../data/0_archived/'+date+'_api_raw.ndjson.xz');
+	let filenameTmp = resolve(__dirname,'../data/'+((new Date()).toISOString()+'.tmp');
+	let xz = helper.lineXzipWriter(filenameTmp);
 
 	do {
 		process.stderr.write('.');
@@ -38,4 +40,6 @@ const {resolve} = require('path');
 	
 	console.log('close')
 	await xz.close();
+	
+	fs.renameSync(filenameTmp, filenameOut);
 })()
