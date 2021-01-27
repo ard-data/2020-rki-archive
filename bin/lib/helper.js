@@ -11,6 +11,7 @@ var helper = module.exports = {
 	fetch,
 	gzip, gunzip,
 	xzip, xunzip,
+	lineXzipReader, lineXzipWriter,
 	runParallel,
 	lineGzipReader, lineGzipWriter,
 	jsonGzipMultiReader,
@@ -141,6 +142,54 @@ function xzip(bufIn) {
 
 function xunzip(bufIn) {
 	return runCommand('xz', ['-dck'], bufIn);
+}
+
+async function* lineXzipReader(filename) {
+	let xz = cp.spawn('xz', ['-dck', filename]);
+
+	let lastLine = '';
+	for await (let block of xz.stdout) {
+		let lines = (lastLine + block.toString()).split('\n');
+		lastLine = lines.pop();
+		for (let line of lines) yield line;
+	}
+}
+
+function lineXzipWriter(filename) {
+	let finished = false;
+	let block = [], blockSize = 0;
+	let xz = cp.spawn('xz', ['-zck9e']);
+	let file = fs.createWriteStream(filename);
+	xz.stdout.pipe(file);
+
+	async function write(line) {
+		if (finished) throw Error();
+
+		block.push(line+'\n');
+		blockSize += line.length;
+		if (blockSize > 1e5) await flush();
+	}
+
+	async function flush() {
+		let buf = Buffer.from(block.join(''));
+		block = [];
+		blockSize = 0;
+		return new Promise(res => xz.stdin.write(buf, res))
+	}
+
+	async function close() {
+		if (finished) throw Error();
+
+		await flush();
+		finished = true;
+
+		return new Promise(res => {
+			xz.once('close', res);
+			xz.stdin.end();
+		})
+	}
+	
+	return {write,close};
 }
 
 function runCommand(cmd, args, bufIn) {
