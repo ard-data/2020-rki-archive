@@ -10,7 +10,7 @@ const {resolve} = require('path');
 const pathIn  = resolve(__dirname, '../data/0_archived');
 const pathOut = resolve(__dirname, '../data/2_parsed');
 
-let filesIn = fs.readdirSync(pathIn).filter(f => f.endsWith('.bz2'));
+let filesIn = fs.readdirSync(pathIn).filter(f => f.endsWith('.xz'));
 
 (async () => {
 	for (let fileIn of filesIn) {
@@ -21,38 +21,45 @@ let filesIn = fs.readdirSync(pathIn).filter(f => f.endsWith('.bz2'));
 
 		let filenameIn  = resolve(pathIn,  fileIn);
 		let filenameOut = resolve(pathOut, fileOut);
+		let filenameTmp = resolve(pathOut, 'temp.xz');
+
 		if (fs.existsSync(filenameOut)) continue;
 
 		console.log('parsing '+fileIn);
 
 		let type = fileIn.replace(timestamp,'?');
-		let data;
+		let xz = helper.lineXzipWriter(filenameTmp);
 
 		switch (type) {
-			case '?_api_raw.json.bz2':
-				data = await openApiRaw(filenameIn);
+			case '?_api_raw.json.xz':
+				await openJSONApiRaw(filenameIn, parseEntry);
 			break;
-			case '?_dump.csv.bz2':
-				data = await openCsvDump(filenameIn);
+			case '?_api_raw.ndjson.xz':
+				await openNDJSONApiRaw(filenameIn, parseEntry);
+			break;
+			case '?_dump.csv.xz':
+				await openCsvDump(filenameIn, parseEntry);
 			break;
 			default: throw Error(`unknown type "${type}"`)
 		}
 
-		data.forEach(cleanupDates);
-		
-		checkData(data);
+		async function parseEntry(entry) {
+			cleanupDates(entry);
+			checkEntry(entry);
+			await xz.write(JSON.stringify(entry));
+		}
 
-		await saveData(data, filenameOut);
+		await xz.close();
+		fs.renameSync(filenameTmp, filenameOut);
 	}
 })()
 
-async function openApiRaw(filenameIn) {
+async function openJSONApiRaw(filenameIn, cbEntry) {
 	console.log('   load');
 	let data = await fs.promises.readFile(filenameIn);
 
 	console.log('   decompress');
-	data = await helper.bunzip2(data);
-	data = data.toString('utf8');
+	data = await helper.xunzip(data);
 
 	console.log('   parse');
 	data = JSON.parse(data);
@@ -60,19 +67,25 @@ async function openApiRaw(filenameIn) {
 	data = data.map(b => b.features.map(e => e.attributes));
 	data = [].concat.apply([], data);
 
-	data.forEach(obj => {
-		if ((obj.Altersgruppe2 === '') || (obj.Altersgruppe2 === 'nicht übermittelt')) delete obj.Altersgruppe2;
-	})
-
-	return data;
+	for (let entry of data) await cbEntry(entry);
 }
 
-async function openCsvDump(filenameIn) {
+async function openNDJSONApiRaw(filenameIn, cbEntry) {
+	console.log('   load and process');
+	for await (let line of helper.lineXzipReader(filenameIn)) {
+		line = JSON.parse(line);
+		for (let feature of line.features) {
+			await cbEntry(feature.attributes);
+		}
+	}
+}
+
+async function openCsvDump(filenameIn, cbEntry) {
 	console.log('   load');
 	let data = await fs.promises.readFile(filenameIn);
 
 	console.log('   decompress');
-	data = await helper.bunzip2(data);
+	data = await helper.xunzip(data);
 	data = data.toString('utf8');
 
 	console.log('   parse');
@@ -141,51 +154,35 @@ async function openCsvDump(filenameIn) {
 		}
 	})
 
-	return data;
+	for (let entry of data) await cbEntry(entry);
 }
 
-function checkData(data) {
-	console.log('   check');
+function checkEntry(obj) {
+	let keyList = Object.keys(obj);
+	
+	let keysLookup = new Set(keyList);
 
-	data.forEach(obj => {
-		let keyList = Object.keys(obj);
-		
-		let keysLookup = new Set(keyList);
+	keyList.forEach(key => {
+		if (obj[key] === undefined) {
+			delete obj[key];
+			return;
+		}
+		if (!config.checkField(key, obj[key])) error('field check failed: key "'+key+'", value "'+obj[key]+'"');
+	});
+	
+	config.mandatoryList.forEach(keyMandatory => {
+		if (!keysLookup.has(keyMandatory)) error('mandatory key missing: "'+keyMandatory+'" in Object "'+JSON.stringify(obj)+'"');
+		keysLookup.delete(keyMandatory);
+	})
 
-		keyList.forEach(key => {
-			if (obj[key] === undefined) {
-				delete obj[key];
-				return;
-			}
-			if (!config.checkField(key, obj[key])) error('field check failed: key "'+key+'", value "'+obj[key]+'"');
-		});
-		
-		config.mandatoryList.forEach(keyMandatory => {
-			if (!keysLookup.has(keyMandatory)) error('mandatory key missing: "'+keyMandatory+'" in Object "'+JSON.stringify(obj)+'"');
-			keysLookup.delete(keyMandatory);
-		})
-
-		Array.from(keysLookup.keys()).forEach(key => {
-			if (!config.optionalSet.has(key)) error('key is not known: "'+key+'"');
-		})
+	Array.from(keysLookup.keys()).forEach(key => {
+		if (!config.optionalSet.has(key)) error('key is not known: "'+key+'"');
 	})
 
 	function error(text) {
 		console.error(text);
 		throw Error();
 	}
-}
-
-async function saveData(data, filenameOut) {
-	console.log('   stringify');
-	data = data.map(e => Buffer.from(JSON.stringify(e)+'\n'));
-	data = Buffer.concat(data);
-
-	console.log('   compress');
-	data = await helper.xzip(data);
-
-	console.log('   save');
-	await fs.promises.writeFile(filenameOut, data);
 }
 
 function cleanupDates(obj) {
