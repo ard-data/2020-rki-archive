@@ -24,6 +24,8 @@ function generateIndex(dir) {
 
 	result.sort();
 
+	fs.writeFileSync(resolve(fullDir, 'index.txt'), result.join('\n'));
+
 	let html = result.map(f => '<a href="'+cloudUrl+dir+'/'+f+'">'+f+'</a>').join('<br>\n');
 	html = '<html><body>'+html+'</body></html>';
 

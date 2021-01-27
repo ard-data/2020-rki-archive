@@ -24,6 +24,6 @@ signalUpdate=42
 
 node 4_index_data.js
 
-gsutil rsync -r -x '(?!.*\.(xz|html))' ../data/ gs://brdata-public-data/rki-corona-archiv/
+gsutil rsync -r -x '(?!.*\.(xz|txt|html))' ../data/ gs://brdata-public-data/rki-corona-archiv/
 
 exit $signalUpdate
