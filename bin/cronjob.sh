@@ -22,10 +22,8 @@ signalUpdate=42
 	echo "ERROR happend $error"
 }
 
-sleep 3
+node 4_index_data.js
 
-git add ../data/
-git commit -m "automatic data update" || exit $signalNoUpdate
-git push
+gsutil rsync -r -x '(?!.*\.(xz|html))' ../data/ gs://brdata-public-data/rki-corona-archiv/
 
 exit $signalUpdate
