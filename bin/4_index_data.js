@@ -15,19 +15,23 @@ function generateIndex(dir) {
 	let fullDir = resolve(__dirname, '../data/', dir);
 	let result = [];
 
-	fs.readdirSync(fullDir).forEach(entry => {
-		let stat = fs.statSync(resolve(fullDir, entry));
+	fs.readdirSync(fullDir).forEach(f => {
+		let stat = fs.statSync(resolve(fullDir, f));
 		if (stat.isDirectory()) return;
-		if (!entry.endsWith('.xz')) return;
-		result.push(entry);
+		if (!f.endsWith('.xz')) return;
+		result.push({
+			url:cloudUrl+dir+'/'+f,
+			name:f,
+			size:Math.round(stat.size/1024).toString().replace(/\B(?=(\d{3})+(?!\d))/g, "'")+' KB',
+		});
 	})
 
 	result.sort();
 
-	fs.writeFileSync(resolve(fullDir, 'index.txt'), result.join('\n'));
+	fs.writeFileSync(resolve(fullDir, 'index.txt'), result.map(f => f.name).join('\n'));
 
-	let html = result.map(f => '<a href="'+cloudUrl+dir+'/'+f+'">'+f+'</a>').join('<br>\n');
-	html = '<html><body>'+html+'</body></html>';
+	let html = result.map(f => '<a href="'+f.url+'">'+f.name+'</a> '+f.size).join('<br>\n');
+	html = '<html><body style="font-family:monospace">'+html+'</body></html>';
 
 	fs.writeFileSync(resolve(fullDir, 'index.html'), html);
 }
