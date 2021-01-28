@@ -13,7 +13,7 @@ signalUpdate=42
 
 {
 	node 1_download.js &&
-	sh 2_deduplicate.sh &&
+	bash 2_deduplicate.sh &&
 	node 3_parse.js
 } || {
 	error=$?
@@ -24,6 +24,10 @@ signalUpdate=42
 
 node 4_index_data.js
 
-gsutil rsync -r -x '(?!.*\.(xz|txt|html))' ../data/ gs://brdata-public-data/rki-corona-archiv/
+uploadResults=$( { bash 6_upload.sh 2>&1 | grep "Copying file"; } 2>&1 )
+if [ $uploadResults ]; then
+	echo $uploadResults
+	exit $signalUpdate
+fi
 
-exit $signalUpdate
+exit $signalNoUpdate
