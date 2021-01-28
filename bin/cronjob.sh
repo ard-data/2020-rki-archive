@@ -25,11 +25,10 @@ git pull
 
 node 4_index_data.js
 
-uploadResults=$( { bash 6_upload.sh | grep "Copying file"; } )
+uploadResults=$( { bash 6_upload.sh; } )
 
-if [ -z "$uploadResults" ]; then
-	exit $signalNoUpdate
+if ( echo "$uploadResults" | grep "Copying file" ); then
+	exit $signalUpdate
 fi
 
-echo "$uploadResults"
-exit $signalUpdate
+exit $signalNoUpdate
