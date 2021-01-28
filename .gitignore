@@ -1,5 +1,6 @@
 
 .DS_Store
 /bin/z_*
-/data/*/
+/data/
 /node_modules/
+/tmp/

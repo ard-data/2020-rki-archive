@@ -16,7 +16,9 @@ const {resolve} = require('path');
 
 	let date = (new Date()).toISOString().slice(0,16).replace(/[^0-9]/g,'-');
 	let filenameOut = resolve(__dirname,'../data/0_archived/'+date+'_api_raw.ndjson.xz');
-	let filenameTmp = resolve(__dirname,'../data/'+(new Date()).toISOString()+'.tmp');
+	let filenameTmp = resolve(__dirname,'../tmp/'+(new Date()).toISOString()+'.tmp');
+	fs.mkdirSync(resolve(__dirname,'../tmp/'), {recursive:true});
+
 	let xz = helper.lineXzipWriter(filenameTmp);
 
 	do {
