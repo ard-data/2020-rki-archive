@@ -6,29 +6,29 @@ Das RKI veröffentlicht täglich die [gemeldeten Coronafälle in einer Tabelle](
 
 Diese Daten liegen unter einer offenen, mit CC-BY kompatiblen Lizenz vor: Robert Koch-Institut, [dl-de-by-2.0](https://www.govdata.de/dl-de/by-2-0)
 
-Leider werden alte Versionen dieser Daten täglich überschrieben. Das hat zur Folge, dass man bspw. nicht den Verzug zwischen Erkrankungsbeginn und Veröffentlichung analysieren kann, was aber zentral für eigene Nowcasting-Berechnungen ist.
+Leider werden die alten Versionen dieser Daten täglich überschrieben. Das hat zur Folge, dass man bspw. nicht den Verzug zwischen Erkrankungsbeginn und Veröffentlichung analysieren kann, was aber zentral z.B. für eigene Nowcasting-Berechnungen ist.
 
-Daher haben wir allerhand alte Daten-Versionen gesammelt und stellen sie in diesem GitHub-Repo ebenfalls unter RKI dl-de-by-2.0 zur Verfügung. Per cronjob versuchen wir das Archiv täglich aktuell zu halten. Als Feature bereinigen wir sogar die Daten, um z.B. die Probleme mit den unterschiedlichen Datumsformaten zu korrigieren.
+Daher haben wir allerhand alte Daten-Versionen gesammelt und stellen sie Online ebenfalls unter RKI dl-de-by-2.0 zur Verfügung. Per cronjob versuchen wir das Archiv täglich aktuell zu halten. Als Feature bereinigen wir sogar die Daten, um z.B. die Probleme mit den unterschiedlichen Datumsformaten zu korrigieren.
 
 **Falls jemand noch andere alte Datenversionen rumliegen hat, freuen wir uns über Datenspenden.**
 
-## Aufbau
+## Daten
 
-### Verzeichnis `/data/`
+Mit Ausbruch der 2. Welle ist die Datenmenge enorm gestiegen und würde langfristig mehrere Gigabytes benötigen. Daher mussten die Daten in ein Google Storage ausgelagert werden.
 
-- Die Rohdaten sind unter `data/0_archived` und werden täglich ergänzt.
-- Fehlerhafte Rohdaten werden nach `data/1_ignored` verschoben, z.B. wenn durch technische Probleme nur die halbe CSV-Datei zum Download stand.
-- Gesäuberte Daten landen täglich als JSON unter `data/2_parsed`.
+### Wo sind die Daten zu finden?
 
-### alte Daten werden extern archiviert
+- Die Rohdaten sind (`0_archived`), werden täglich ergänzt und im Anschluss [hier als HTML-Datei](https://storage.googleapis.com/brdata-public-data/rki-corona-archiv/0_archived/index.html) oder [wahlweise als TXT-Datei](https://storage.googleapis.com/brdata-public-data/rki-corona-archiv/0_archived/index.txt) chronologisch sortiert aufgelistet.
+- Fehlerhafte Rohdaten werden nach `1_ignored` verschoben, z.B. wenn durch technische Probleme nur Teile der CSV-Datei zum Download stand: [HTML](https://storage.googleapis.com/brdata-public-data/rki-corona-archiv/1_ignored/index.html)/[TXT](https://storage.googleapis.com/brdata-public-data/rki-corona-archiv/1_ignored/index.txt)
+- Gesäuberte Daten landen täglich als JSON unter `2_parsed` und sind aufgelistet als [HTML](https://storage.googleapis.com/brdata-public-data/rki-corona-archiv/2_parsed/index.html) oder [TXT](https://storage.googleapis.com/brdata-public-data/rki-corona-archiv/2_parsed/index.txt)
 
-Mit Ausbruch der 2. Welle ist die Datenmenge enorm gestiegen und würde langfristig mehrere Gigabytes benötigen. Daher werden die alte Datenbestände als monatliche TAR-Archive nach extern ausgelagert. Sie sind zu finden unter:
-- [Dropbox](https://www.dropbox.com/sh/8dz0gm2es9ppiej/AAAe8Plyx9XHWeQOrRM4C_tga?lst=)
-- [Nextcloud](https://share.ard-zdf-box.de/s/brLC55gjMerNDAK)
+### Welches Format haben sie?
 
-Als Kontrollmöglichkeit gibt es die Hashwerte der Archive als MD5, SHA1 und SHA256 unter `data/monthly_archive`.
+Da die Datenmenge sehr stark angewachsen ist und einzelne Dumps über 500 MB groß werden können, so dass die 1-GB-Stringlängenbegrenzung von JavaScript überschritten wird, musste auf ein neues Datenformat umgestiegen werden. Die Dateien liegen jetzt vor:
+- als [NDJSON](http://ndjson.org) (jede Zeile ist ein JSON-Objekt, dass einem Eintrag entspricht, und auf '\n' endet) und
+- mit [XZ-Utils](https://tukaani.org/xz/format.html) komprimiert (XZ/LZMA ist sehr effektiv, open-source, kostenlos, plattformübergreifend erhältlich und wird von vielen Kompressionsprogrammen unterstützt)
 
-### Datenfelder:
+### Datenfelder
 
 Die Datenfelder sind vom RKI [auf der ArcGIS-Plattform](https://npgeo-corona-npgeo-de.hub.arcgis.com/datasets/dd4580c810204019a7b8eb3e0b329dd6_0) beschrieben.
 
@@ -45,30 +45,25 @@ Der Code läuft aktuell nur unter UNIX-Betriebssystemen, also z.B. Linux/Mac OS.
 - `bin/1_download.js` ist der API Scraper, der bei uns stündlich läuft.
 - `bin/2_deduplicate.sh` löscht doppelte Dateien, also wenn es keine Änderungen an den Daten gab.
 - `bin/3_parse.js` parst die API-/CSV-Rohdaten und macht daraus sauberes und einheitliches JSON.
+- `bin/4_index_data.js` generiert HTML- und TXT-Listen als Hilfe for den Cloud Storage.
+- `bin/6_upload.sh` lädt die Daten in den Cloud Storage hoch. Hier können Vorschläge gemacht werden, wohin die Dateien noch gesichert werden können.
 - `bin/cronjob.sh` ist das stündliche cronjob-Script
 - `bin/lib/config.js` enthält einen Überblick über alle Felder, inklusive einfacher Tests, ob die Felder richtig befüllt sind.
 - `bin/lib/helper.js` sind die kleinen Helferlein, die man so braucht.
-- `bin/example_scan.js` ist ein kleines Demo-Script, das zeigt, wie man alle geparsten Daten einmal durchscannen kann.
 
-## Beispiele
+## Beispiel
 
-### Node.js
+Die [gesäuberten Daten aus `2_parsed`](https://storage.googleapis.com/brdata-public-data/rki-corona-archiv/2_parsed/index.html) kann man relativ leicht auf der Shell parsen und filtern. Beispiel:
 
-`bin/example_scan.js` ist, wie erwähnt, ein kleines Demo-Script.
-
-### Shell
-
-Die Daten kann man relativ leicht auf der Shell parsen und filtern. Beispiel:
-
-`bzip2 -dkcq *.json.bz2 | jq -r '.[] | select (.IdLandkreis == "09162" and .Altersgruppe == "A05-A14") | [.Geschlecht, .AnzahlFall, .NeuerFall, .MeldedatumISO, .DatenstandISO, .RefdatumISO] | @tsv'`
+`xz -dkc *.ndjson.xz | jq -r '. | select (.IdLandkreis == "09162" and .Altersgruppe == "A05-A14") | [.Geschlecht, .AnzahlFall, .NeuerFall, .MeldedatumISO, .DatenstandISO, .RefdatumISO] | @tsv'`
 
 Der Befehl besteht aus den folgenden Teilen:
 
-- `bzip2 -dkcq *.json.bz2 | `  
-Dekomprimiere alle Dateien (`-d`), die auf `.json.bz2` enden und pipe die Ergebnisse (`-c`) weiter.
+- `xz -dkc *.ndjson.xz | `  
+Dekomprimiere alle Dateien (`-d`), die auf `.ndjson.xz` enden und pipe die Ergebnisse (`-c`) weiter.
 - `jq -r '`…`'`  
 Mit [jq](https://stedolan.github.io/jq/) kann man sehr effizient JSON verarbeiten. Die [Query- und Filtermöglichkeiten sind gut dokumentiert](https://stedolan.github.io/jq/manual/#Basicfilters).
-- `.[] | select (.IdLandkreis == "09162" and .Altersgruppe == "A05-A14") | [.Geschlecht, .AnzahlFall, .NeuerFall, .MeldedatumISO, .DatenstandISO, .RefdatumISO] | @tsv'`  
+- `. | select (.IdLandkreis == "09162" and .Altersgruppe == "A05-A14") | [.Geschlecht, .AnzahlFall, .NeuerFall, .MeldedatumISO, .DatenstandISO, .RefdatumISO] | @tsv'`  
 Alle bekannten COVID19-Fälle aus dem Stadtkreis München (`.IdLandkreis == "09162"`), mit Patient_innen im Schulalter (`.Altersgruppe == "A05-A14"`) sollen als Tab-separierte Datei (`| @tsv`) exportiert werden, mit den 6 Spalten: Geschlecht, AnzahlFall, NeuerFall, MeldedatumISO, DatenstandISO, RefdatumISO
 
 ## weitere Ideen
