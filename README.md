@@ -18,14 +18,14 @@ Mit Ausbruch der 2. Welle ist die Datenmenge enorm gestiegen und würde langfris
 
 ### Wo sind die Daten zu finden?
 
-- Die Rohdaten sind (`0_archived`), werden täglich ergänzt und im Anschluss [hier als HTML-Datei](https://storage.googleapis.com/brdata-public-data/rki-corona-archiv/0_archived/index.html) oder [wahlweise als TXT-Datei](https://storage.googleapis.com/brdata-public-data/rki-corona-archiv/0_archived/index.txt) chronologisch sortiert aufgelistet.
-- Fehlerhafte Rohdaten werden nach `1_ignored` verschoben, z.B. wenn durch technische Probleme nur Teile der CSV-Datei zum Download stand: [HTML](https://storage.googleapis.com/brdata-public-data/rki-corona-archiv/1_ignored/index.html)/[TXT](https://storage.googleapis.com/brdata-public-data/rki-corona-archiv/1_ignored/index.txt)
-- Gesäuberte Daten landen täglich als JSON unter `2_parsed` und sind aufgelistet als [HTML](https://storage.googleapis.com/brdata-public-data/rki-corona-archiv/2_parsed/index.html) oder [TXT](https://storage.googleapis.com/brdata-public-data/rki-corona-archiv/2_parsed/index.txt)
+- Die Rohdaten werden täglich ergänzt im Ordner `0_archived` und im Anschluss [hier als HTML-Datei](https://storage.googleapis.com/brdata-public-data/rki-corona-archiv/0_archived/index.html) oder [wahlweise als TXT-Datei](https://storage.googleapis.com/brdata-public-data/rki-corona-archiv/0_archived/index.txt) chronologisch sortiert aufgelistet.
+- Fehlerhafte Rohdaten werden nach `1_ignored` verschoben, z.B. wenn durch technische Probleme nur Teile der CSV-Datei zum Download standen: [HTML](https://storage.googleapis.com/brdata-public-data/rki-corona-archiv/1_ignored/index.html)/[TXT](https://storage.googleapis.com/brdata-public-data/rki-corona-archiv/1_ignored/index.txt)
+- **Gesäuberte Daten werden täglich hochgeladen unter `2_parsed` und sind hier aufgelistet als [HTML](https://storage.googleapis.com/brdata-public-data/rki-corona-archiv/2_parsed/index.html) oder [TXT](https://storage.googleapis.com/brdata-public-data/rki-corona-archiv/2_parsed/index.txt)**
 
 ### Welches Format haben sie?
 
 Da die Datenmenge sehr stark angewachsen ist und einzelne Dumps über 500 MB groß werden können, so dass die 1-GB-Stringlängenbegrenzung von JavaScript überschritten wird, musste auf ein neues Datenformat umgestiegen werden. Die Dateien liegen jetzt vor:
-- als [NDJSON](http://ndjson.org) (jede Zeile ist ein JSON-Objekt, dass einem Eintrag entspricht, und auf '\n' endet) und
+- als [NDJSON](http://ndjson.org) (jede Zeile ist ein Eintrag als JSON-Objekt und endet auf '\n') und
 - mit [XZ-Utils](https://tukaani.org/xz/format.html) komprimiert (XZ/LZMA ist sehr effektiv, open-source, kostenlos, plattformübergreifend erhältlich und wird von vielen Kompressionsprogrammen unterstützt)
 
 ### Datenfelder
