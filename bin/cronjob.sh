@@ -2,14 +2,15 @@
 
 source ~/.profile
 
-set -e
-set -x
-cd "$(dirname "$0")"
-
-git pull
-
 signalNoUpdate=0
 signalUpdate=42
+
+cd "$(dirname "$0")"
+
+set -e
+set -x
+
+git pull
 
 {
 	node 1_download.js &&
@@ -24,10 +25,11 @@ signalUpdate=42
 
 node 4_index_data.js
 
-uploadResults=$( { bash 6_upload.sh 2>&1 | grep "Copying file"; } 2>&1 )
-if [ $uploadResults ]; then
-	echo $uploadResults
-	exit $signalUpdate
+uploadResults=$( { bash 6_upload.sh | grep "Copying file"; } )
+
+if [ -z "$uploadResults" ]; then
+	exit $signalNoUpdate
 fi
 
-exit $signalNoUpdate
+echo "$uploadResults"
+exit $signalUpdate
