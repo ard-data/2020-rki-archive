@@ -20,9 +20,12 @@ const {resolve} = require('path');
 	fs.mkdirSync(resolve(__dirname,'../tmp/'), {recursive:true});
 
 	let xz = helper.lineXzipWriter(filenameTmp);
+	let step = 0;
 
 	do {
-		process.stderr.write('.');
+		if (step % 5 === 0) process.stderr.write('·');
+		step++;
+
 		let url = 'https://services7.arcgis.com/mOBPykOjAyBO2ZKk/arcgis/rest/services/RKI_COVID19/FeatureServer/0/query?where=1%3D1&outFields=*&orderByFields=ObjectId%20ASC&resultOffset='+(page*pageSize)+'&resultRecordCount='+pageSize+'&f=json';
 		data = await helper.fetch(url);
 		try {
