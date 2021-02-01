@@ -6,12 +6,14 @@ const fs = require('fs');
 const colors = require('colors');
 const helper = require('./lib/helper.js');
 const config = require('./lib/config.js');
-const {resolve} = require('path');
+const {resolve, relative} = require('path');
 
-const path0 = resolve(__dirname, '../data/0_archived');
-const path1 = resolve(__dirname, '../data/1_ignored');
-const path2 = resolve(__dirname, '../data/2_parsed');
-const path4 = resolve(__dirname, '../data/z_4_overview');
+const base  = resolve(__dirname, '../data/');
+const path0 = resolve(base, '0_archived');
+const path1 = resolve(base, '1_ignored');
+const path2 = resolve(base, '2_parsed');
+const path4 = resolve(base, 'z_4_overview');
+
 fs.mkdirSync(path4, {recursive:true})
 
 const files0 = scanFolder(path0);
@@ -19,20 +21,18 @@ const files2 = scanFolder(path2);
 
 (async () => {
 	console.log('   find archived, but not parsed'.grey);
-	minus(files0, files2).forEach(f => console.log(colors.yellow('git mv "'+f.fullname+'" "'+path1+'"')));
+	minus(files0, files2).forEach(f => console.log(colors.yellow('mv "'+relative(base, f.fullname)+'" "'+relative(base, path1)+'"')));
 
 	console.log('   find parsed, but not archived'.grey);
-	minus(files2, files0).forEach(f => console.log(colors.yellow('rm "'+f.fullname+'"')));
+	minus(files2, files0).forEach(f => console.log(colors.yellow('rm "'+relative(base, f.fullname)+'"')));
 
 	console.log('   check sums in parsed'.grey);
-	await scanSums(files2);
+	await addSums(files2);
 
-	duplicatedDays(files2).forEach(entry => {
-		console.log(colors.white(entry.day));
-		entry.files.forEach(file => {
-			console.log(colors.red('   '+[file.filename, file.entryCount, file.size].join('\t')));
-		})
-	});
+	if (!sanityCheck(files2)) {
+		process.exit(1);
+		console.log('errors found');
+	}
 })()
 
 function scanFolder(path) {
@@ -61,18 +61,43 @@ function minus(list1, list2) {
 	return list1;
 }
 
-function duplicatedDays(list) {
-	let dayLookup = new Map();
-	list.forEach(f => {
-		if (!dayLookup.has(f.day)) return dayLookup.set(f.day, {day:f.day, files:[f]});
-		dayLookup.get(f.day).files.push(f);
+if (function sanityCheck(files) {
+	let noErrors = true;
+	let lastCaseCount = 0;
+	let lastEntryCount = -1;
+	let lastFilename = -1;
+
+	files.forEach(file => {
+		let errors = [];
+
+
+		if (file.filename > 'data_2020-05-01') {
+			if (file.caseCount <= lastCaseCount) errors.push('- less cases???');
+			if (file.caseCount > 1.05*lastCaseCount+10000) errors.push('- way too much cases');
+
+			if (file.entryCount <= lastEntryCount) errors.push('- less entries???');
+			if (file.entryCount > 1.5*lastEntryCount) errors.push('- way too much entries');
+		}
+
+		if (errors.length > 0) {
+			console.log('CHECK ERROR');
+			console.log(errors.join('\n'));
+			console.table([
+				{filename: lastFilename, entryCount: lastEntryCount, caseCount: lastCaseCount},
+				{filename: file.filename, entryCount: file.entryCount, caseCount: file.caseCount}
+			])
+			noErrors = false;
+		}
+
+		lastCaseCount  = file.caseCount;
+		lastEntryCount = file.entryCount;
+		lastFilename   = file.filename;
 	});
-	dayLookup = Array.from(dayLookup.values());
-	dayLookup = dayLookup.filter(e => e.files.length > 1);
-	return dayLookup;
+
+	return noErrors;
 }
 
-async function scanSums(files) {
+async function addSums(files) {
 	for (let file of files) {
 		let info = await getFileInfo(file);
 		file.caseCount = info.caseCount;
