@@ -14,7 +14,7 @@ const path1 = resolve(base, '1_ignored');
 const path2 = resolve(base, '2_parsed');
 const path4 = resolve(base, 'z_4_overview');
 
-fs.mkdirSync(path4, {recursive:true})
+fs.mkdirSync(path4, {recursive:true});
 
 const files0 = scanFolder(path0);
 const files2 = scanFolder(path2);
@@ -61,7 +61,7 @@ function minus(list1, list2) {
 	return list1;
 }
 
-if (function sanityCheck(files) {
+function sanityCheck(files) {
 	let noErrors = true;
 	let lastCaseCount = 0;
 	let lastEntryCount = -1;
@@ -83,7 +83,7 @@ if (function sanityCheck(files) {
 			console.log('CHECK ERROR');
 			console.log(errors.join('\n'));
 			console.table([
-				{filename: lastFilename, entryCount: lastEntryCount, caseCount: lastCaseCount},
+				{filename:  lastFilename, entryCount:  lastEntryCount, caseCount:  lastCaseCount},
 				{filename: file.filename, entryCount: file.entryCount, caseCount: file.caseCount}
 			])
 			noErrors = false;
