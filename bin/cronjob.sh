@@ -2,9 +2,6 @@
 
 source ~/.profile
 
-signalNoUpdate=0
-signalUpdate=42
-
 cd "$(dirname "$0")"
 
 set -e
@@ -15,20 +12,20 @@ git pull
 {
 	node 1_download.js &&
 	bash 2_deduplicate.sh &&
-	node 3_parse.js
+	node 3_parse.js &&
+	node 4_check.js
 } || {
 	error=$?
-	signalNoUpdate=$error
-	signalUpdate=$error
 	echo "ERROR happend $error"
+	exit $error
 }
 
-node 4_index_data.js
+node 5_index_data.js
 
 uploadResults=$( { bash 6_upload.sh; } )
 
 if ( echo "$uploadResults" | grep "Copying file" ); then
-	exit $signalUpdate
+	exit 42
 fi
 
-exit $signalNoUpdate
+exit 0
