@@ -30,9 +30,11 @@ Da die Datenmenge sehr stark angewachsen ist und einzelne Dumps über 500 MB gro
 
 ### Datenfelder
 
-Die Datenfelder sind vom RKI [auf der ArcGIS-Plattform](https://npgeo-corona-npgeo-de.hub.arcgis.com/datasets/dd4580c810204019a7b8eb3e0b329dd6_0) beschrieben.
+Die Datenfelder wurde vom RKI [auf der ArcGIS-Plattform](https://npgeo-corona-npgeo-de.hub.arcgis.com/datasets/dd4580c810204019a7b8eb3e0b329dd6_0) beschrieben. (Hinweis: Die komplette Beschreibung sieht man erst, wenn man auf den kleinen, blauen "Mehr"-Link klickt.)
 
 Es hat sich aber gezeigt, dass insbesondere die Datumsfelder in einem schlechten Zustand sind. Neben viel zu vielen unterschiedlichen Datumsformaten, gibt es sogar Fälle, wo sich Leute angeblich bereits 1956 infiziert haben. Der Parser korrigiert die gröbsten Fehler und ergänzt die Datensätze um die Felder `MeldedatumISO`, `DatenstandISO` und `RefdatumISO`, die das jeweilige Datum immer in der Form `"YYYY-MM-DD"` angeben.
+
+[Hier noch eine kurze Erklärung](https://github.com/ard-data/2020-rki-archive/issues/2#issuecomment-770791045), warum Fallzahlen negativ sein können.
 
 Ansonsten haben wir uns bemüht darauf zu achten, keine Fehler zu machen. Falls uns trotzdem einer unterlaufen ist, freuen wir uns über Hinweise.
 
