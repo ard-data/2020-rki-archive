@@ -1,6 +1,6 @@
 "use strict"
 
-const cp = require('child_process');
+const child_process = require('child_process');
 const fs = require('fs');
 const https = require('https');
 const zlib = require('zlib');
@@ -140,7 +140,7 @@ async function* lineXzipReader(filename) {
 function lineXzipWriter(filename) {
 	let finished = false;
 	let block = [], blockSize = 0;
-	let xz = cp.spawn('xz', ['-zck9e']);
+	let xz = child_process.spawn('xz', ['-zck9e']);
 	let file = fs.createWriteStream(filename);
 	xz.stdout.pipe(file);
 
@@ -177,7 +177,7 @@ function lineXzipWriter(filename) {
 function runCommand(cmd, args, bufIn) {
 	return new Promise((resolve, reject) => {
 		let bufOut = [];
-		let p = cp.spawn(cmd, args);
+		let p = child_process.spawn(cmd, args);
 		p.stdin.end(bufIn);
 		p.stdout.on('data', chunk => bufOut.push(chunk));
 		p.stdout.on('end', () => resolve(Buffer.concat(bufOut)));;
