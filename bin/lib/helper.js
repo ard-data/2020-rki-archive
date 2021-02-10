@@ -14,7 +14,6 @@ var helper = module.exports = {
 	lineXzipReader, lineXzipWriter,
 	runParallel,
 	lineGzipReader, lineGzipWriter,
-	jsonGzipMultiReader,
 	encodeTSV, encodeCSV,
 	slowDown, logPercent,
 }
@@ -41,43 +40,20 @@ function fetch(url) {
 }
 
 async function* lineGzipReader(filename, cb) {
+	const gz = child_process.spawn('gz', ['-dck', filename]);
 
-	let file = fs.createReadStream(filename);
-	let gzip = zlib.createGunzip({chunkSize:1024*1024});
+	let buffer = Buffer.alloc(0);
+	for await (let block of gz.stdout) {
+		buffer = Buffer.concat([buffer, block]);
 
-	if (cb) {
-		let sizeSum = fs.statSync(filename).size;
-		let sizePos = 0;
-		let through = new PassThrough();
-		through.on('data', chunk => cb((sizePos += chunk.length)/sizeSum))
-		file.pipe(through).pipe(gzip);
-	} else {
-		file.pipe(gzip);
+		let pos, lastPos = 0;
+		while ((pos = buffer.indexOf(10, lastPos)) >= 0) {
+			yield buffer.slice(lastPos, pos).toString();
+			lastPos = pos+1;
+		}
+		buffer = buffer.slice(lastPos);
 	}
-
-	let lastLine = '';
-	for await (let block of gzip) {
-		let lines = (lastLine + block.toString()).split('\n');
-		lastLine = lines.pop();
-		for (let line of lines) yield line;
-	}
-}
-
-async function* jsonGzipMultiReader(filenames, cb) {
-	let sizeSum = 0;
-	filenames.forEach(f => sizeSum += fs.statSync(f).size);
-	let sizePos = 0;
-
-	for (let filename of filenames) {
-		//console.log(filename);
-		let file = fs.readFileSync(filename);
-		let data = zlib.gunzipSync(file);
-		data = JSON.parse(data);
-
-		for (let entry of data) yield entry;
-
-		cb((sizePos += file.length)/sizeSum)
-	}
+	if (buffer.length > 0) yield buffer.toString();
 }
 
 function lineGzipWriter(filename) {
@@ -145,14 +121,20 @@ function xunzip(bufIn) {
 }
 
 async function* lineXzipReader(filename) {
-	let xz = cp.spawn('xz', ['-dck', filename]);
+	const xz = child_process.spawn('xz', ['-dck', filename]);
 
-	let lastLine = '';
+	let buffer = Buffer.alloc(0);
 	for await (let block of xz.stdout) {
-		let lines = (lastLine + block.toString()).split('\n');
-		lastLine = lines.pop();
-		for (let line of lines) yield line;
+		buffer = Buffer.concat([buffer, block]);
+
+		let pos, lastPos = 0;
+		while ((pos = buffer.indexOf(10, lastPos)) >= 0) {
+			yield buffer.slice(lastPos, pos).toString();
+			lastPos = pos+1;
+		}
+		buffer = buffer.slice(lastPos);
 	}
+	if (buffer.length > 0) yield buffer.toString();
 }
 
 function lineXzipWriter(filename) {
