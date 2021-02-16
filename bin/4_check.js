@@ -72,10 +72,10 @@ function sanityCheck(files) {
 
 
 		if (file.filename > 'data_2020-05-01') {
-			if (file.caseCount <= lastCaseCount) errors.push('- less cases???');
+			if (file.caseCount < lastCaseCount) errors.push('- less cases???');
 			if (file.caseCount > 1.05*lastCaseCount+10000) errors.push('- way too much cases');
 
-			if (file.entryCount <= lastEntryCount) errors.push('- less entries???');
+			if (file.entryCount < lastEntryCount) errors.push('- less entries???');
 			if (file.entryCount > 1.5*lastEntryCount) errors.push('- way too much entries');
 		}
 
