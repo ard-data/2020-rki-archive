@@ -5,27 +5,56 @@
 const fs = require('fs');
 const helper = require('./lib/helper.js');
 const {resolve} = require('path');
+const tempFolder = resolve(__dirname,'../tmp/');
 
 (async () => {
 	console.log('download')
 
 	let date = (new Date()).toISOString().slice(0,16).replace(/[^0-9]/g,'-');
-	let filenameOut = resolve(__dirname,'../data/0_archived/'+date+'_api_raw.ndjson.xz');
-	let filenameTmp = resolve(__dirname,'../tmp/'+(new Date()).toISOString()+'.tmp');
-	fs.mkdirSync(resolve(__dirname,'../tmp/'), {recursive:true});
+	let filenameOut = resolve(__dirname,'../data/0_archived/'+date+'_dump.csv.xz');
+	fs.mkdirSync(tempFolder, {recursive:true});
 
-	await scrapeAPI(filenameTmp);
+	//let filenameTmp = await scrapeAPI();
+	let filenameTmp = await downloadCSV();
 	
-	fs.renameSync(filenameTmp, filenameOut);
+	if (filenameTmp) fs.renameSync(filenameTmp, filenameOut);
 })()
 
-async function scrapeAPI(filenameTmp) {
+async function downloadCSV() {
+	let metadata = await helper.fetch('https://www.arcgis.com/sharing/rest/content/items/f10774f1c63e40168479a1feb6c7ca74?f=json');
+	metadata = JSON.parse(metadata);
+	let lastModified = Math.round(metadata.modified/1000);
+
+	let lockFilename = resolve(tempFolder, lastModified+'.lock');
+
+	if (fs.existsSync(lockFilename)) return false; // we already downloaded that file
+
+	let redirect = await helper.fetchRedirect('https://www.arcgis.com/sharing/rest/content/items/f10774f1c63e40168479a1feb6c7ca74/data')
+
+	console.log('download CSV');
+	let buffer = await helper.fetch(redirect);
+
+	console.log('compress');
+	buffer = await helper.xzip(buffer);
+
+	console.log('write');
+	let filename = getTempFilename();
+	fs.writeFileSync(filename, buffer);
+
+	fs.writeFileSync(lockFilename, '', 'utf8');
+
+	return filename;
+}
+
+async function scrapeAPI() {
+	let filename = getTempFilename();
+
 	let page = 0;
 	let pageSize = 5000;
 	let count = 0;
 	let data;
 	let step = 0;
-	let xz = helper.lineXzipWriter(filenameTmp);
+	let xz = helper.lineXzipWriter(filename);
 
 	do {
 		if (step % 5 === 0) process.stderr.write('·');
@@ -50,5 +79,10 @@ async function scrapeAPI(filenameTmp) {
 	
 	console.log('close')
 	await xz.close();
+
+	return filename;
 }
 
+function getTempFilename() {
+	return resolve(tempFolder, (new Date()).toISOString().replace(/[^0-9]+/g, '_')+'.tmp');
+}
