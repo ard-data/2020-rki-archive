@@ -82,80 +82,66 @@ async function openNDJSONApiRaw(filenameIn, cbEntry) {
 }
 
 async function openCsvDump(filenameIn, cbEntry) {
-	console.log('   load');
-	let data = await fs.promises.readFile(filenameIn);
+	console.log('   load and parse');
 
-	console.log('   decompress');
-	data = await helper.xunzip(data);
-	data = data.toString('utf8');
+	let header;
+	for await (let line of helper.lineXzipReader(filenameIn)) {
+		if (line.charCodeAt(0) > 200) line = line.slice(1);
+		if (line.endsWith('\r')) line = line.slice(0, line.length-1);
 
-	console.log('   parse');
-
-	if (data.charCodeAt(0) > 200) data = data.slice(1);
-
-	data = data.split(/[\n\r]+/).filter(l => l);
-
-	let header = data.shift();
-	header = header
-		.replace(/\s+/g, '')
-		.replace('LandkreisID', 'IdLandkreis')
-
-	let separator = header.replace(/[0-9a-zöäüß]+/gi,'').split('').sort();
-	separator = separator[Math.floor(separator.length/2)];
-
-	header = header.split(separator);
-
-	data = data.map(l => {
-		l = l.trim();
-
-		let quoteCount = (l.match(/\"/g) || []).length;
+		let quoteCount = (line.match(/\"/g) || []).length;
 		if (quoteCount === 2) {
-			l = l.replace(/\".*\"/, t => t.replace(/[\",;]+/g,''));
-		} else if (quoteCount !== 0) throw Error(JSON.stringify(l));
+			line = line.replace(/\".*\"/, t => t.replace(/[\",;]+/g,''));
+		} else if (quoteCount !== 0) throw Error(JSON.stringify(line));
 
-		l = l.split(separator);
-		if (l.length !== header.length) throw Error(JSON.stringify(l));
+
+		if (!header) {
+			header = line;
+			header = header.replace('FID', 'ObjectId');
+			header = header.split(',')
+			//header = header
+			//	.replace(/\s+/g, '')
+			//	.replace('LandkreisID', 'IdLandkreis')
+			// if (defined('Referenzdatum')) obj.Refdatum = obj.Referenzdatum;
+			checkHeader(header);
+			continue;
+		}
+
+		line = line.split(',');
+
+		if (line.length !== header.length) throw Error(JSON.stringify(line));
 
 		let obj = {};
-		header.forEach((k,i) => obj[k] = l[i]);
+		header.forEach((k,i) => obj[k] = line[i]);
 
-		if (defined('FID')) obj.ObjectId = obj.FID;
+		obj.IdBundesland = parseInt(obj.IdBundesland, 10);
+		obj.AnzahlFall = parseInt(obj.AnzahlFall, 10);
+		obj.AnzahlTodesfall = parseInt(obj.AnzahlTodesfall, 10);
+		obj.ObjectId = parseInt(obj.ObjectId, 10);
+		obj.NeuerFall = parseInt(obj.NeuerFall, 10);
+		obj.NeuerTodesfall = parseInt(obj.NeuerTodesfall, 10);
 
-		if (defined('IdBundesland')) obj.IdBundesland = parseInt(obj.IdBundesland, 10);
-		if (defined('AnzahlFall')) obj.AnzahlFall = parseInt(obj.AnzahlFall, 10);
-		if (defined('AnzahlTodesfall')) obj.AnzahlTodesfall = parseInt(obj.AnzahlTodesfall, 10);
-		if (defined('ObjectId')) obj.ObjectId = parseInt(obj.ObjectId, 10);
-		if (defined('NeuerFall')) obj.NeuerFall = parseInt(obj.NeuerFall, 10);
-		if (defined('NeuerTodesfall')) obj.NeuerTodesfall = parseInt(obj.NeuerTodesfall, 10);
-
-		if (defined('AnzahlGenesen')) obj.AnzahlGenesen = parseInt(obj.AnzahlGenesen, 10);
-		if (defined('NeuGenesen')) obj.NeuGenesen = parseInt(obj.NeuGenesen, 10);
-		if (defined('IstErkrankungsbeginn')) obj.IstErkrankungsbeginn = parseInt(obj.IstErkrankungsbeginn, 10);
+		obj.AnzahlGenesen = parseInt(obj.AnzahlGenesen, 10);
+		obj.NeuGenesen = parseInt(obj.NeuGenesen, 10);
+		obj.IstErkrankungsbeginn = parseInt(obj.IstErkrankungsbeginn, 10);
 
 		if (obj.IdLandkreis === '0-1') obj.IdLandkreis = '-1';
 
-		if (defined('Referenzdatum')) obj.Refdatum = obj.Referenzdatum;
-
 		if ((obj.Altersgruppe2 === '') || (obj.Altersgruppe2 === 'nicht übermittelt')) delete obj.Altersgruppe2;
 
-		delete obj.Referenzdatum;
-		delete obj.FID
+		cbEntry(obj);
+	}
 
-		return obj;
-
-		function defined(key) {
-			let v = obj[key];
-			if (v) return true;
-			let type = typeof v;
-			if ((v === '') || (type === 'undefined')) {
-				delete obj[key];
-				return false;
-			}
-			throw Error(JSON.stringify([key,v,typeof v]));
+	function checkHeader(header) {
+		const correctHeader = new Set('IdBundesland,Bundesland,Landkreis,Altersgruppe,Geschlecht,AnzahlFall,AnzahlTodesfall,ObjectId,Meldedatum,IdLandkreis,Datenstand,NeuerFall,NeuerTodesfall,Refdatum,NeuGenesen,AnzahlGenesen,IstErkrankungsbeginn,Altersgruppe2'.split(','));
+		header.forEach(field => {
+			if (correctHeader.has(field)) return correctHeader.delete(field);
+			throw Error('unknown header field "'+field+'"');
+		})
+		for (let field of correctHeader.values()) {
+			throw Error('missing header field "'+field+'"');
 		}
-	})
-
-	for (let entry of data) await cbEntry(entry);
+	}
 }
 
 function checkEntry(obj) {
