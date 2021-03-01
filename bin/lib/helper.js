@@ -9,6 +9,7 @@ const {PassThrough} = require('stream')
 var helper = module.exports = {	
 	bzip2, bunzip2,
 	fetch,
+	fetchRedirect,
 	gzip, gunzip,
 	xzip, xunzip,
 	lineXzipReader, lineXzipWriter,
@@ -33,6 +34,20 @@ function fetch(url) {
 				console.log(response);
 				throw Error();
 			}
+		}).on('error', error => {
+			throw Error(error)
+		})
+	});
+}
+
+function fetchRedirect(url) {
+	return new Promise((resolve, reject) => {
+		https.get(url, response => {
+			if (response.statusCode !== 302) {
+				console.log(response);
+				throw Error();
+			}
+			return resolve(response.headers.location);
 		}).on('error', error => {
 			throw Error(error)
 		})
