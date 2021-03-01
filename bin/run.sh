@@ -7,7 +7,7 @@ cd "$(dirname "$0")"
 set -e
 set -x
 
-git pull
+git pull -q
 
 {
 	node 1_download.js &&

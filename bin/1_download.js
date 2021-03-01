@@ -24,11 +24,11 @@ async function downloadCSV() {
 	let metadata = await helper.fetch('https://www.arcgis.com/sharing/rest/content/items/f10774f1c63e40168479a1feb6c7ca74?f=json');
 	metadata = JSON.parse(metadata);
 
-	console.log('latest version is from: '+(new Date(metadata.modified)).toISOString())
+	console.log('latest: '+(new Date(metadata.modified)).toISOString())
 	let lockFilename = resolve(tempFolder, metadata.modified+'.lock');
 
 	if (fs.existsSync(lockFilename)) {
-		console.log('skip, because we already downloaded that file');
+		console.log('skip, already downloaded');
 		return false;
 	}
 

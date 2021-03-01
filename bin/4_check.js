@@ -20,13 +20,13 @@ const files0 = scanFolder(path0);
 const files2 = scanFolder(path2);
 
 (async () => {
-	console.log('   find archived, but not parsed'.grey);
+	console.log('   archived, not parsed');
 	minus(files0, files2).forEach(f => console.log(colors.yellow('mv "'+relative(base, f.fullname)+'" "'+relative(base, path1)+'"')));
 
-	console.log('   find parsed, but not archived'.grey);
+	console.log('   parsed, not archived');
 	minus(files2, files0).forEach(f => console.log(colors.yellow('rm "'+relative(base, f.fullname)+'"')));
 
-	console.log('   check sums in parsed'.grey);
+	console.log('   check sums in parsed');
 	await addSums(files2);
 
 	if (!sanityCheck(files2)) {

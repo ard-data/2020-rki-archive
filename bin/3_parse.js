@@ -72,7 +72,6 @@ async function openJSONApiRaw(filenameIn, cbEntry) {
 }
 
 async function openNDJSONApiRaw(filenameIn, cbEntry) {
-	console.log('   load and process');
 	for await (let line of helper.lineXzipReader(filenameIn)) {
 		line = JSON.parse(line);
 		for (let feature of line.features) {
@@ -82,8 +81,6 @@ async function openNDJSONApiRaw(filenameIn, cbEntry) {
 }
 
 async function openCsvDump(filenameIn, cbEntry) {
-	console.log('   load and parse');
-
 	let header;
 	for await (let line of helper.lineXzipReader(filenameIn)) {
 		if (line.charCodeAt(0) > 200) line = line.slice(1);
