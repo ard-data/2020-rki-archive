@@ -209,7 +209,7 @@ function cleanupDates(obj) {
 					break;
 				}
 
-				if (/^2020\/\d{2}\/\d{2} 00:00:00$/.test(result)) {
+				if (/^202\d\/\d{2}\/\d{2} 00:00:00$/.test(result)) {
 					result = Date.parse(result);
 					break;
 				}
