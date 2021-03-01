@@ -113,7 +113,7 @@ function gunzip(bufIn) {
 
 function xzip(bufIn) {
 	if (typeof bufIn === 'string') bufIn = Buffer.from(bufIn, 'utf8');
-	return runCommand('xz', ['-zck9e'], bufIn);
+	return runCommand('xz', ['-zck9'], bufIn);
 }
 
 function xunzip(bufIn) {
