@@ -23,11 +23,14 @@ const tempFolder = resolve(__dirname,'../tmp/');
 async function downloadCSV() {
 	let metadata = await helper.fetch('https://www.arcgis.com/sharing/rest/content/items/f10774f1c63e40168479a1feb6c7ca74?f=json');
 	metadata = JSON.parse(metadata);
-	let lastModified = Math.round(metadata.modified/1000);
 
-	let lockFilename = resolve(tempFolder, lastModified+'.lock');
+	console.log('last version from: '+(new Date(metadata.modified)).toISOString())
+	let lockFilename = resolve(tempFolder, metadata.modified+'.lock');
 
-	if (fs.existsSync(lockFilename)) return false; // we already downloaded that file
+	if (fs.existsSync(lockFilename)) {
+		console.log('we already downloaded that file');
+		return false;
+	}
 
 	let redirect = await helper.fetchRedirect('https://www.arcgis.com/sharing/rest/content/items/f10774f1c63e40168479a1feb6c7ca74/data')
 
