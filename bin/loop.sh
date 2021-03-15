@@ -7,5 +7,5 @@ do
 	echo "start run at $(date '+%Y-%m-%d %H:%M:%S')"
 	/home/michaelkreil/projects/notificato/notificato.sh "Corona Scraper" ./run.sh || true
 	echo "finished run at $(date '+%Y-%m-%d %H:%M:%S')"
-	sleep 600
+	sleep 1800
 done
