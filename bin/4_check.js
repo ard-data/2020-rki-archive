@@ -21,10 +21,10 @@ const files2 = scanFolder(path2);
 
 (async () => {
 	console.log('   archived, not parsed');
-	minus(files0, files2).forEach(f => console.log(colors.yellow('mv "'+relative(base, f.fullname)+'" "'+relative(base, path1)+'"')));
+	minus(files0, files2).forEach(f => console.log('mv "'+relative(base, f.fullname)+'" "'+relative(base, path1)+'"'));
 
 	console.log('   parsed, not archived');
-	minus(files2, files0).forEach(f => console.log(colors.yellow('rm "'+relative(base, f.fullname)+'"')));
+	minus(files2, files0).forEach(f => console.log('rm "'+relative(base, f.fullname)+'"'));
 
 	console.log('   check sums in parsed');
 	await addSums(files2);
@@ -109,7 +109,7 @@ async function addSums(files) {
 
 		if (fs.existsSync(cacheFile)) return JSON.parse(fs.readFileSync(cacheFile))
 
-		console.log(('      scan '+file.filename).grey);
+		console.log('      scan '+file.filename);
 
 		let entryCount = 0;
 		let caseCount = 0;
