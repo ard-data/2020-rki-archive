@@ -16,6 +16,12 @@ git pull -q
 	node 4_check.js
 } || {
 	error=$?
+
+	if [ $error -eq 42 ]; then
+		echo "no new data"
+		exit 0
+	fi
+
 	echo "ERROR happend $error"
 	exit $error
 }
@@ -26,7 +32,8 @@ uploadResults=$( { bash 6_upload.sh | grep "Copying file"; } )
 
 free -h
 
-if ( echo "$uploadResults" ); then
+if [ ! -z "$uploadResults" ]; then
+	echo "$uploadResults"
 	exit 42
 fi
 

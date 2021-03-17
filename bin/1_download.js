@@ -17,7 +17,13 @@ const tempFolder = resolve(__dirname,'../tmp/');
 	//let filenameTmp = await scrapeAPI();
 	let filenameTmp = await downloadCSV();
 	
-	if (filenameTmp) fs.renameSync(filenameTmp, filenameOut);
+	if (filenameTmp) {
+		// download completed
+		fs.renameSync(filenameTmp, filenameOut);
+	} else {
+		// no new download
+		process.exit(42);
+	}
 })()
 
 async function downloadCSV() {
