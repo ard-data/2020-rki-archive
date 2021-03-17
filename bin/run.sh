@@ -24,6 +24,8 @@ node 5_index_data.js
 
 uploadResults=$( { bash 6_upload.sh | grep "Copying file"; } )
 
+free -h
+
 if ( echo "$uploadResults" ); then
 	exit 42
 fi
