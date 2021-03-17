@@ -1,7 +1,5 @@
 #!/bin/bash
 
-source ~/.profile
-
 cd "$(dirname "$0")"
 
 set -e
