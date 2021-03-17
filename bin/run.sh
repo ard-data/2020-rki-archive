@@ -22,9 +22,9 @@ git pull -q
 
 node 5_index_data.js
 
-uploadResults=$( { bash 6_upload.sh; } )
+uploadResults=$( { bash 6_upload.sh | grep "Copying file"; } )
 
-if ( echo "$uploadResults" | grep "Copying file" ); then
+if ( echo "$uploadResults" ); then
 	exit 42
 fi
 
