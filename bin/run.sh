@@ -30,9 +30,9 @@ uploadResults=$( { bash 6_upload.sh | grep "Copying file"; } )
 
 free -h
 
-if [ ! -z "$uploadResults" ]; then
-	echo "$uploadResults"
+if [[ "$uploadResults" == "" ]]; then
 	exit 42
 fi
 
+echo "$uploadResults"
 exit 0
