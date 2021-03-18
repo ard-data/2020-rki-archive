@@ -22,7 +22,7 @@ const tempFolder = resolve(__dirname,'../tmp/');
 		fs.renameSync(filenameTmp, filenameOut);
 	} else {
 		// no new download
-		// process.exit(42);
+		if (Math.random() < 0.9) process.exit(42);
 	}
 })()
 
