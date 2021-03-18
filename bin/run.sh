@@ -31,6 +31,7 @@ uploadResults=$( { bash 6_upload.sh | grep "Copying file"; } )
 free -h
 
 if [[ "$uploadResults" == "" ]]; then
+	echo "no new files, thx, bye"
 	exit 42
 fi
 
