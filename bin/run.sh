@@ -26,7 +26,7 @@ git pull -q
 
 node 5_index_data.js
 
-uploadResults=$( { bash 6_upload.sh | grep "Copying file"; } )
+uploadResults=$({ bash 6_upload.sh | grep "Copying file"; }) || true
 
 free -h
 
