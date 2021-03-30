@@ -136,7 +136,7 @@ async function openCsvDump(filenameIn, cbEntry) {
 			throw Error('unknown header field "'+field+'"');
 		})
 		for (let field of correctHeader.values()) {
-			throw Error('missing header field "'+field+'"');
+			console.log('missing header field "'+field+'"');
 		}
 	}
 }
