@@ -180,19 +180,17 @@ function cleanupDates(obj) {
 		let result = value;
 		switch (typeof value) {
 			case 'string':
-				if (result.startsWith('19')) return undefined; // 1956, 1966, … SRSLY?
-
 				if (/^\d{8}00000$/.test(result)) {
 					result = parseInt(result, 10);
 					break;
 				}
 
-				if (/^\d{1,2}\/\d{1,2}\/2020 12:00:00 AM$/.test(result)) {
+				if (/^\d{1,2}\/\d{1,2}\/20\d\d 12:00:00 AM$/.test(result)) {
 					result = Date.parse(result);
 					break;
 				}
 
-				if (/^202\d\/\d{2}\/\d{2} 00:00:00$/.test(result)) {
+				if (/^20\d\d\/\d{2}\/\d{2} 00:00:00$/.test(result)) {
 					result = Date.parse(result);
 					break;
 				}
