@@ -71,12 +71,12 @@ function sanityCheck(files) {
 		let errors = [];
 
 
-		if (file.filename > 'data_2020-05-01') {
-			if (file.caseCount < lastCaseCount) errors.push('- less cases???');
-			if (file.caseCount > 1.05*lastCaseCount+10000) errors.push('- way too much cases');
+		if (file.filename > 'data_2020-8-01') {
+			if (file.caseCount <= lastCaseCount) errors.push('- less cases???');
+			if (file.caseCount >  lastCaseCount+40000) errors.push('- way too much cases');
 
-			if (file.entryCount < lastEntryCount) errors.push('- less entries???');
-			if (file.entryCount > 1.5*lastEntryCount) errors.push('- way too much entries');
+			if (file.entryCount <= lastEntryCount) errors.push('- less entries???');
+			if (file.entryCount >  lastEntryCount+15000) errors.push('- way too much entries');
 		}
 
 		if (errors.length > 0) {
@@ -84,7 +84,8 @@ function sanityCheck(files) {
 			console.log(errors.join('\n'));
 			console.table([
 				{filename:  lastFilename, entryCount:  lastEntryCount, caseCount:  lastCaseCount},
-				{filename: file.filename, entryCount: file.entryCount, caseCount: file.caseCount}
+				{filename: file.filename, entryCount: file.entryCount, caseCount: file.caseCount},
+				{filename:        'diff', entryCount: file.entryCount-lastEntryCount, caseCount: file.caseCount-lastCaseCount}
 			])
 			noErrors = false;
 		}
