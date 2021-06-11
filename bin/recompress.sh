@@ -17,6 +17,6 @@ do
 
 	echo "recompress $filename"
 
-	xz -dkcq $src_file | xz -z9eq > $tmp_file
+	nice -20 xz -dkcq $src_file | xz -z9eq > $tmp_file
 	mv -f $tmp_file $dst_file
 done
