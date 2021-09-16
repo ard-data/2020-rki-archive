@@ -4,7 +4,7 @@ const child_process = require('child_process');
 const fs = require('fs');
 const https = require('https');
 const zlib = require('zlib');
-const {PassThrough} = require('stream')
+const { PassThrough } = require('stream')
 
 var helper = module.exports = {	
 	bzip2, bunzip2,
