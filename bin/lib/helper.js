@@ -128,7 +128,7 @@ function gunzip(bufIn) {
 
 function xzip(bufIn) {
 	if (typeof bufIn === 'string') bufIn = Buffer.from(bufIn, 'utf8');
-	return runCommand('xz', ['-zck9'], bufIn);
+	return runCommand('xz', ['-zck1'], bufIn);
 }
 
 function xunzip(bufIn) {
@@ -155,7 +155,7 @@ async function* lineXzipReader(filename) {
 function lineXzipWriter(filename) {
 	let finished = false;
 	let block = [], blockSize = 0;
-	let xz = child_process.spawn('xz', ['-zck9']);
+	let xz = child_process.spawn('xz', ['-zck1']);
 	let file = fs.createWriteStream(filename);
 	xz.stdout.pipe(file);
 
