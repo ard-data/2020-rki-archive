@@ -9,7 +9,7 @@ git pull -q
 
 {
 	node 1_download.js &&
-	bash 2_deduplicate.sh &&
+	node 2_deduplicate.js &&
 	node 3_parse.js &&
 	node 4_check.js
 } || {
