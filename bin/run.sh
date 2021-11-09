@@ -17,7 +17,7 @@ git pull -q
 
 	if [ $error -eq 42 ]; then
 		echo "no new data"
-		exit 0
+		node 7_recompress.js || exit 0
 	else
 		echo "ERROR happend $error"
 		exit $error
