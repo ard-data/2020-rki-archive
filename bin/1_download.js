@@ -56,6 +56,9 @@ async function downloadCSV() {
 }
 
 async function scrapeAPI() {
+	// not used
+	// but we may need that function when CSV download is not available
+
 	let filename = getTempFilename();
 
 	let page = 0;

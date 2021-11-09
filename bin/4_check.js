@@ -3,10 +3,8 @@
 "use strict"
 
 const fs = require('fs');
-const colors = require('colors');
 const helper = require('./lib/helper.js');
-const config = require('./lib/config.js');
-const {resolve, relative} = require('path');
+const { resolve, relative } = require('path');
 
 const base  = resolve(__dirname, '../data/');
 const path0 = resolve(base, '0_archived');
@@ -123,21 +121,5 @@ async function addSums(files) {
 		fs.writeFileSync(cacheFile, JSON.stringify(data))
 
 		return data;
-
-		function condense(list) {
-			list.sort((a,b) => a-b);
-
-			let lastEntry = false;
-			let entries = [];
-			list.forEach(id => {
-				if (lastEntry && (lastEntry[1]+1 === id)) {
-					lastEntry[1] = id;
-				} else {
-					lastEntry = [id, id];
-					entries.push(lastEntry);
-				}
-			})
-			return entries;
-		}
 	}
 }

@@ -13,6 +13,8 @@ const pathOut = resolve(__dirname, '../data/2_parsed');
 let filesIn = fs.readdirSync(pathIn).filter(f => f.endsWith('.xz'));
 
 (async () => {
+	let xz;
+	
 	for (let fileIn of filesIn) {
 		let timestamp = fileIn.match(/\d\d\d\d-\d\d-\d\d-\d\d-\d\d/);
 		if (!timestamp) throw Error();
@@ -29,7 +31,7 @@ let filesIn = fs.readdirSync(pathIn).filter(f => f.endsWith('.xz'));
 		console.log('parsing '+fileIn);
 
 		let type = fileIn.replace(timestamp,'?');
-		let xz = helper.lineXzipWriter(filenameTmp);
+		helper.lineXzipWriter(filenameTmp);
 
 		switch (type) {
 			case '?_api_raw.json.xz':
@@ -44,14 +46,14 @@ let filesIn = fs.readdirSync(pathIn).filter(f => f.endsWith('.xz'));
 			default: throw Error(`unknown type "${type}"`)
 		}
 
-		async function parseEntry(entry) {
-			cleanupDates(entry);
-			checkEntry(entry);
-			await xz.write(JSON.stringify(entry));
-		}
-
 		await xz.close();
 		fs.renameSync(filenameTmp, filenameOut);
+	}
+
+	async function parseEntry(entry) {
+		cleanupDates(entry);
+		checkEntry(entry);
+		await xz.write(JSON.stringify(entry));
 	}
 })()
 
