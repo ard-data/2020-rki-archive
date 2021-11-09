@@ -8,20 +8,20 @@ set -x
 git pull -q
 
 {
-	node 1_download.js &&
-	node 2_deduplicate.js &&
-	node 3_parse.js &&
-	node 4_check.js
+	node 1_download.js \
+		&& node 2_deduplicate.js \
+		&& node 3_parse.js \
+		&& node 4_check.js
 } || {
 	error=$?
 
 	if [ $error -eq 42 ]; then
 		echo "no new data"
 		exit 0
+	else
+		echo "ERROR happend $error"
+		exit $error
 	fi
-
-	echo "ERROR happend $error"
-	exit $error
 }
 
 node 5_index_data.js
