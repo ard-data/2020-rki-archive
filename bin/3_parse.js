@@ -31,7 +31,7 @@ let filesIn = fs.readdirSync(pathIn).filter(f => f.endsWith('.xz'));
 		console.log('parsing '+fileIn);
 
 		let type = fileIn.replace(timestamp,'?');
-		helper.lineXzipWriter(filenameTmp);
+		xz = helper.lineXzipWriter(filenameTmp);
 
 		switch (type) {
 			case '?_api_raw.json.xz':
