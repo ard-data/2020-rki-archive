@@ -8,8 +8,6 @@ const {resolve} = require('path');
 const tempFolder = resolve(__dirname,'../tmp/');
 
 (async () => {
-	console.log('download')
-
 	let date = (new Date()).toISOString().slice(0,16).replace(/[^0-9]/g,'-');
 	let filenameOut = resolve(__dirname,'../data/0_archived/'+date+'_dump.csv.xz');
 	fs.mkdirSync(tempFolder, {recursive:true});
