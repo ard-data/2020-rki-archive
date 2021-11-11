@@ -9,7 +9,6 @@ const { resolve } = require('path');
 const lookback = 20;
 
 check('0_archived');
-
 check('2_parsed');
 
 process.exit(42);
@@ -48,7 +47,7 @@ function check(folder) {
 	// max diff
 	files.sort((a,b) => b.diff - a.diff);
 	let worstFile = files[0];
-	console.log('worst file diff', (worstFile.diff/1024).toFixed(0), 'KB');
+	//console.log('worst file diff', (worstFile.diff/1024).toFixed(0), 'KB');
 
 	if (worstFile.diff < 5e5) return // everything is ok
 
@@ -58,7 +57,7 @@ function check(folder) {
 }
 
 function recompress(fullname) {
-	console.log('recompress', fullname);
+	console.log('   recompress', fullname);
 
 	const tempFolder = resolve(__dirname, '../tmp');
 	fs.mkdirSync(tempFolder, { recursive:true })

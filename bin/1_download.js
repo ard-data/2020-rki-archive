@@ -30,23 +30,23 @@ async function downloadCSV() {
 	let metadata = await helper.fetch('https://www.arcgis.com/sharing/rest/content/items/f10774f1c63e40168479a1feb6c7ca74?f=json');
 	metadata = JSON.parse(metadata);
 
-	console.log('\tlatest: '+(new Date(metadata.modified)).toISOString().slice(0,16))
+	console.log('   latest: '+(new Date(metadata.modified)).toISOString().slice(0,16))
 	let lockFilename = resolve(tempFolder, metadata.modified+'.lock');
 
 	if (fs.existsSync(lockFilename)) {
-		console.log('\talready downloaded');
+		console.log('   already downloaded');
 		return false;
 	}
 
 	let redirect = await helper.fetchRedirect('https://www.arcgis.com/sharing/rest/content/items/f10774f1c63e40168479a1feb6c7ca74/data')
 
-	console.log('\tdownload CSV');
+	console.log('   download CSV');
 	let buffer = await helper.fetch(redirect);
 
-	console.log('\tcompress');
+	console.log('   compress');
 	buffer = await helper.xzip(buffer);
 
-	console.log('\twrite');
+	console.log('   write');
 	let filename = getTempFilename();
 	fs.writeFileSync(filename, buffer);
 
@@ -89,7 +89,7 @@ async function scrapeAPI() {
 
 	process.stderr.write(' '+count+'\n');
 	
-	console.log('\tclose')
+	console.log('   close')
 	await xz.close();
 
 	return filename;
