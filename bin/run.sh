@@ -28,8 +28,6 @@ node 5_index_data.js
 
 uploadResults=$({ bash 6_upload.sh | grep "Copying file" | grep -v "index"; }) || true
 
-free -h | head -n2
-
 if [[ "$uploadResults" == "" ]]; then
 	echo "no new files, thx, bye"
 	exit 0
