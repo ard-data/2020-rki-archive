@@ -8,8 +8,11 @@ const { resolve } = require('path');
 
 const lookback = 20;
 
-check('0_archived');
-check('2_parsed');
+if ((new Date()).getHours() > 20) {
+	// recompress only in the evening after 20:00
+	check('0_archived');
+	check('2_parsed');
+}
 
 process.exit(42);
 
