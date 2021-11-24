@@ -25,6 +25,7 @@ const tempFolder = resolve(__dirname,'../tmp/');
 })()
 
 async function downloadCSV() {
+	// Quelle: https://www.arcgis.com/home/item.html?id=f10774f1c63e40168479a1feb6c7ca74
 	let metadata = await helper.fetch('https://www.arcgis.com/sharing/rest/content/items/f10774f1c63e40168479a1feb6c7ca74?f=json');
 	metadata = JSON.parse(metadata);
 
@@ -56,6 +57,8 @@ async function downloadCSV() {
 async function scrapeAPI() {
 	// not used
 	// but we may need that function when CSV download is not available
+	// data status: https://npgeo-corona-npgeo-de.hub.arcgis.com/datasets/38e0356be30642868b4c526424102718_0/explore
+
 
 	let filename = getTempFilename();
 
