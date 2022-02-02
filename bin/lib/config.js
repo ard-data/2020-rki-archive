@@ -1,7 +1,7 @@
 "use strict"
 
 const fields = [
-	{name:'ObjectId',             mandatory:true,  check:v => (typeof v === 'number')},
+	{name:'ObjectId',             mandatory:false, check:v => (typeof v === 'number')},
 	{name:'IdBundesland',         mandatory:true,  check:v => (typeof v === 'number') && /^(\-1|\d+)$/.test(v)},
 	{name:'Bundesland',           mandatory:true,  check:v => (typeof v === 'string')},
 	{name:'IdLandkreis',          mandatory:true,  check:v => (typeof v === 'string') && /^(\-1|\d{4,5})$/.test(v)},

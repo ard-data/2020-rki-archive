@@ -25,8 +25,8 @@ const tempFolder = resolve(__dirname,'../tmp/');
 })()
 
 async function downloadCSV() {
-	// Quelle: https://www.arcgis.com/home/item.html?id=f10774f1c63e40168479a1feb6c7ca74
-	let metadata = await helper.fetch('https://www.arcgis.com/sharing/rest/content/items/f10774f1c63e40168479a1feb6c7ca74?f=json');
+	// Quelle: https://www.arcgis.com/home/item.html?id=66876b81065340a4a48710b062319336
+	let metadata = await helper.fetch('https://www.arcgis.com/sharing/rest/content/items/66876b81065340a4a48710b062319336?f=json');
 	metadata = JSON.parse(metadata);
 
 	console.log('   latest: '+(new Date(metadata.modified)).toISOString().slice(0,16))
@@ -37,7 +37,7 @@ async function downloadCSV() {
 		return false;
 	}
 
-	let redirect = await helper.fetchRedirect('https://www.arcgis.com/sharing/rest/content/items/f10774f1c63e40168479a1feb6c7ca74/data')
+	let redirect = await helper.fetchRedirect('https://www.arcgis.com/sharing/rest/content/items/66876b81065340a4a48710b062319336/data')
 
 	console.log('   download CSV');
 	let buffer = await helper.fetch(redirect);

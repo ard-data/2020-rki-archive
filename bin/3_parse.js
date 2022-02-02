@@ -96,12 +96,7 @@ async function openCsvDump(filenameIn, cbEntry) {
 
 		if (!header) {
 			header = line;
-			header = header.replace('FID', 'ObjectId');
 			header = header.split(',')
-			//header = header
-			//	.replace(/\s+/g, '')
-			//	.replace('LandkreisID', 'IdLandkreis')
-			// if (defined('Referenzdatum')) obj.Refdatum = obj.Referenzdatum;
 			checkHeader(header);
 			continue;
 		}
@@ -116,7 +111,6 @@ async function openCsvDump(filenameIn, cbEntry) {
 		obj.IdBundesland = parseInt(obj.IdBundesland, 10);
 		obj.AnzahlFall = parseInt(obj.AnzahlFall, 10);
 		obj.AnzahlTodesfall = parseInt(obj.AnzahlTodesfall, 10);
-		obj.ObjectId = parseInt(obj.ObjectId, 10);
 		obj.NeuerFall = parseInt(obj.NeuerFall, 10);
 		obj.NeuerTodesfall = parseInt(obj.NeuerTodesfall, 10);
 
@@ -132,7 +126,7 @@ async function openCsvDump(filenameIn, cbEntry) {
 	}
 
 	function checkHeader(header) {
-		const correctHeader = new Set('IdBundesland,Bundesland,Landkreis,Altersgruppe,Geschlecht,AnzahlFall,AnzahlTodesfall,ObjectId,Meldedatum,IdLandkreis,Datenstand,NeuerFall,NeuerTodesfall,Refdatum,NeuGenesen,AnzahlGenesen,IstErkrankungsbeginn,Altersgruppe2'.split(','));
+		const correctHeader = new Set('IdBundesland,Bundesland,Landkreis,Altersgruppe,Geschlecht,AnzahlFall,AnzahlTodesfall,Meldedatum,IdLandkreis,Datenstand,NeuerFall,NeuerTodesfall,Refdatum,NeuGenesen,AnzahlGenesen,IstErkrankungsbeginn,Altersgruppe2'.split(','));
 		header.forEach(field => {
 			if (correctHeader.has(field)) return correctHeader.delete(field);
 			throw Error('unknown header field "'+field+'"');
