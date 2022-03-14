@@ -6,7 +6,7 @@ while true; do
 	echo "start run at $(date '+%Y-%m-%d %H:%M:%S')"
 	SECONDS=0
 
-	if [ -f "~/projects/notificato/notificato.js" ]; then
+	if [ -f ~/projects/notificato/notificato.js ]; then
 		node ~/projects/notificato/notificato.js "Corona Scraper" ./run.sh || true
 	else
 		./run.sh || true
