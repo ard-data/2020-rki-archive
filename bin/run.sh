@@ -2,8 +2,8 @@
 
 cd "$(dirname "$0")"
 
-set -e
-set -x
+set -e # exit on error
+#set -x # print commands
 
 git pull -q
 
