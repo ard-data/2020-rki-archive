@@ -69,7 +69,7 @@ function sanityCheck(files) {
 		let errors = [];
 
 
-		if (file.filename > 'data_2020-8-01') {
+		if (file.filename > 'data_2022-04-03') {
 			if (file.caseCount < lastCaseCount) errors.push('- less cases???');
 			if (file.caseCount > lastCaseCount + 500000) errors.push('- way too much cases');
 
