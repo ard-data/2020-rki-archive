@@ -12,7 +12,7 @@ while true; do
 		./run.sh || true
 	fi
 
-	printf "   took %02d:%02d:%02d\n" "$((SECONDS / 3600 % 24))" "$((SECONDS / 60))" "$((SECONDS % 60))"
+	printf "   took %02d:%02d:%02d\n" "$((SECONDS / 3600 % 24))" "$((SECONDS / 60 % 60))" "$((SECONDS % 60))"
 
 	sleep 600
 done
