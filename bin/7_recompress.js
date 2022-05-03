@@ -6,7 +6,7 @@ const fs = require('fs');
 const child_process = require('child_process');
 const { resolve } = require('path');
 
-const lookback = 20;
+const lookback = 80;
 
 if ((new Date()).getHours() > 12) {
 	// recompress only in the evening after 20:00
