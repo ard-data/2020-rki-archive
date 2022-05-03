@@ -73,7 +73,7 @@ function sanityCheck(files) {
 			if (file.caseCount < lastCaseCount) errors.push('- less cases???');
 			if (file.caseCount > lastCaseCount + 500000) errors.push('- way too much cases');
 
-			if (file.entryCount < lastEntryCount -   5000) errors.push('- less entries???');
+			if (file.entryCount < lastEntryCount -  10000) errors.push('- less entries???');
 			if (file.entryCount > lastEntryCount + 100000) errors.push('- way too much entries');
 		}
 
