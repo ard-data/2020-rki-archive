@@ -135,10 +135,23 @@ function xunzip(bufIn) {
 }
 
 async function* lineXzipReader(filename) {
-	const xz = child_process.spawn('xz', ['-dck', filename]);
+	const filesize = fs.statSync(filename).size;
+	let filepos = 0;
+	const time0 = Date.now();
+	const file = fs.createReadStream(filename);
+	file.on('data', chunk => {
+		filepos += chunk.length;
+		let time = Date.now();
+		let p = filepos/filesize;
+		time = (time-time0)/p*(1-p);
+		process.stderr.write('\r'+(100*p).toFixed(2)+'% - '+(time/60000).toFixed(1)+'min')
+	})
+	const xz = child_process.spawn('xz', ['-d']);
+	file.pipe(xz.stdin);
 
 	let buffer = Buffer.alloc(0);
 	for await (let block of xz.stdout) {
+		//console.log(block.length);
 		buffer = Buffer.concat([buffer, block]);
 
 		let pos, lastPos = 0;

@@ -122,7 +122,7 @@ async function openCsvDump(filenameIn, cbEntry) {
 
 		if ((obj.Altersgruppe2 === '') || (obj.Altersgruppe2 === 'nicht übermittelt')) delete obj.Altersgruppe2;
 
-		cbEntry(obj);
+		await cbEntry(obj);
 	}
 
 	function checkHeader(header) {
