@@ -70,7 +70,7 @@ function sanityCheck(files) {
 
 
 		if (file.filename > 'data_2022-04-11') {
-			if (file.caseCount < lastCaseCount) errors.push('- less cases???');
+			if (file.caseCount < lastCaseCount - 10) errors.push('- less cases???');
 			if (file.caseCount > lastCaseCount + 500000) errors.push('- way too much cases');
 
 			if (file.entryCount < lastEntryCount -  10000) errors.push('- less entries???');
