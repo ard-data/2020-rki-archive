@@ -83,10 +83,11 @@ async function openNDJSONApiRaw(filenameIn, cbEntry) {
 }
 
 async function openCsvDump(filenameIn, cbEntry) {
-	let header;
+	let converter;
 	for await (let line of helper.lineXzipReader(filenameIn)) {
 		if (line.charCodeAt(0) > 200) line = line.slice(1);
-		if (line.endsWith('\r')) line = line.slice(0, line.length-1);
+		if (line.endsWith('\r')) line = line.slice(0, line.length - 1);
+		if (line.length === 0) return;
 
 		let quoteCount = (line.match(/\"/g) || []).length;
 		if (quoteCount === 2) {
@@ -94,45 +95,48 @@ async function openCsvDump(filenameIn, cbEntry) {
 		} else if (quoteCount !== 0) throw Error(JSON.stringify(line));
 
 
-		if (!header) {
-			header = line;
-			header = header.split(',')
-			checkHeader(header);
+		if (!converter) {
+			converter = getConverter(line);
 			continue;
 		}
 
-		line = line.split(',');
-
-		if (line.length !== header.length) throw Error(JSON.stringify(line));
-
-		let obj = {};
-		header.forEach((k,i) => obj[k] = line[i]);
-
-		obj.IdBundesland = parseInt(obj.IdBundesland, 10);
-		obj.AnzahlFall = parseInt(obj.AnzahlFall, 10);
-		obj.AnzahlTodesfall = parseInt(obj.AnzahlTodesfall, 10);
-		obj.NeuerFall = parseInt(obj.NeuerFall, 10);
-		obj.NeuerTodesfall = parseInt(obj.NeuerTodesfall, 10);
-
-		obj.AnzahlGenesen = parseInt(obj.AnzahlGenesen, 10);
-		obj.NeuGenesen = parseInt(obj.NeuGenesen, 10);
-		obj.IstErkrankungsbeginn = parseInt(obj.IstErkrankungsbeginn, 10);
-
-		if (obj.IdLandkreis === '0-1') obj.IdLandkreis = '-1';
-
-		if ((obj.Altersgruppe2 === '') || (obj.Altersgruppe2 === 'nicht übermittelt')) delete obj.Altersgruppe2;
-
-		await cbEntry(obj);
+		await cbEntry(converter(line));
 	}
 
-	function checkHeader(header) {
-		const correctHeader = new Set('IdBundesland,Bundesland,Landkreis,Altersgruppe,Geschlecht,AnzahlFall,AnzahlTodesfall,Meldedatum,IdLandkreis,Datenstand,NeuerFall,NeuerTodesfall,Refdatum,NeuGenesen,AnzahlGenesen,IstErkrankungsbeginn,Altersgruppe2'.split(','));
-		header.forEach(field => {
-			if (correctHeader.has(field)) return correctHeader.delete(field);
-			throw Error('unknown header field "'+field+'"');
-		})
-		for (let field of correctHeader.values()) {
-			console.log('missing header field "'+field+'"');
+	function getConverter(header) {
+		if (header === 'IdBundesland,Bundesland,IdLandkreis,Landkreis,Altersgruppe,Altersgruppe2,Geschlecht,Meldedatum,Refdatum,IstErkrankungsbeginn,NeuerFall,NeuerTodesfall,NeuGenesen,AnzahlFall,AnzahlTodesfall,AnzahlGenesen,Datenstand') {
+			return line => {
+				line = line.split(',');
+				if (line.length !== 17) {
+					console.log(line)
+					throw Error('line to short')
+				}
+				return {
+					IdBundesland: parseInt(line[0], 10),
+					Bundesland: line[1],
+					IdLandkreis: fixIdLandkreis(line[2]),
+					Landkreis: line[3],
+					Altersgruppe: line[4],
+					Geschlecht: line[6],
+					Meldedatum: line[7],
+					Refdatum: line[8],
+					IstErkrankungsbeginn: parseInt(line[9], 10),
+					NeuerFall: parseInt(line[10], 10),
+					NeuerTodesfall: parseInt(line[11], 10),
+					NeuGenesen: parseInt(line[12], 10),
+					AnzahlFall: parseInt(line[13], 10),
+					AnzahlTodesfall: parseInt(line[14], 10),
+					AnzahlGenesen: parseInt(line[15], 10),
+					Datenstand: line[16],
+				}
+			}
+		}
+
+		console.log({ header });
+		throw Error('unknown header');
+
+		function fixIdLandkreis(id) {
+			return (id === '0-1') ? '-1' : id;
 		}
 	}
 }
