@@ -1,6 +1,9 @@
 
 .DS_Store
 /bin/z_*
-/data/
+/data/0_archived
+/data/1_ignored
+/data/2_parsed
+/data/z_*
 /node_modules/
 /tmp/
