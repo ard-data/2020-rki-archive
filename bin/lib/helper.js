@@ -144,7 +144,7 @@ async function* lineXzipReader(filename) {
 		let time = Date.now();
 		let p = filepos/filesize;
 		time = (time-time0)/p*(1-p);
-		process.stderr.write('\r'+(100*p).toFixed(2)+'% - '+(time/60000).toFixed(1)+'min')
+		process.stderr.write('\u001b[2K\r\t'+(100*p).toFixed(2)+'%\t'+(time/60000).toFixed(1)+'min')
 	})
 	const xz = child_process.spawn('xz', ['-d']);
 	file.pipe(xz.stdin);
@@ -162,6 +162,7 @@ async function* lineXzipReader(filename) {
 		buffer = buffer.slice(lastPos);
 	}
 	if (buffer.length > 0) yield buffer.toString();
+	process.stderr.write('\n')
 }
 
 function lineXzipWriter(filename) {
