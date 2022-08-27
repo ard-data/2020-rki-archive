@@ -5,7 +5,7 @@
 const fs = require('fs');
 const helper = require('./lib/helper.js');
 const config = require('./lib/config.js');
-const {resolve} = require('path');
+const {resolve, basename} = require('path');
 
 const pathIn  = resolve(__dirname, '../data/0_archived');
 const pathOut = resolve(__dirname, '../data/2_parsed');
@@ -96,14 +96,14 @@ async function openCsvDump(filenameIn, cbEntry) {
 
 
 		if (!converter) {
-			converter = getConverter(line);
+			converter = getConverter(line, filenameIn);
 			continue;
 		}
 
 		await cbEntry(converter(line));
 	}
 
-	function getConverter(header) {
+	function getConverter(header, filename) {
 		if (header === 'IdBundesland,Bundesland,IdLandkreis,Landkreis,Altersgruppe,Altersgruppe2,Geschlecht,Meldedatum,Refdatum,IstErkrankungsbeginn,NeuerFall,NeuerTodesfall,NeuGenesen,AnzahlFall,AnzahlTodesfall,AnzahlGenesen,Datenstand') {
 			return line => {
 				line = line.split(',');
@@ -128,6 +128,44 @@ async function openCsvDump(filenameIn, cbEntry) {
 					AnzahlTodesfall: parseInt(line[14], 10),
 					AnzahlGenesen: parseInt(line[15], 10),
 					Datenstand: line[16],
+				}
+			}
+		}
+		if (header === 'IdLandkreis,Altersgruppe,Geschlecht,Meldedatum,Refdatum,IstErkrankungsbeginn,NeuerFall,NeuerTodesfall,NeuGenesen,AnzahlFall,AnzahlTodesfall,AnzahlGenesen') {
+			let Datenstand = basename(filename).slice(0, 10);
+			let landkreisLookup = fs.readFileSync(resolve(__dirname, '../data/landkreise.json'), 'utf8');
+			landkreisLookup = new Map(JSON.parse(landkreisLookup).map(l => [l.IdLandkreis, l]))
+			
+			return line => {
+				line = line.split(',');
+				if (line.length !== 12) {
+					console.log(line)
+					throw Error('line to short')
+				}
+				let IdLandkreis = fixIdLandkreis(line[0]);
+				let landkreis = landkreisLookup.get(IdLandkreis);
+				if (!landkreis) {
+					console.log({ IdLandkreis });
+					throw Error()
+				}
+
+				return {
+					IdBundesland: landkreis.IdBundesland,
+					Bundesland: landkreis.Bundesland,
+					IdLandkreis,
+					Landkreis: landkreis.Landkreis,
+					Altersgruppe: line[1],
+					Geschlecht: line[2],
+					Meldedatum: line[3],
+					Refdatum: line[4],
+					IstErkrankungsbeginn: parseInt(line[5], 10),
+					NeuerFall: parseInt(line[6], 10),
+					NeuerTodesfall: parseInt(line[7], 10),
+					NeuGenesen: parseInt(line[8], 10),
+					AnzahlFall: parseInt(line[9], 10),
+					AnzahlTodesfall: parseInt(line[10], 10),
+					AnzahlGenesen: parseInt(line[11], 10),
+					Datenstand,
 				}
 			}
 		}
