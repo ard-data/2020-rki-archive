@@ -12,17 +12,17 @@ const path1 = resolve(base, '1_ignored');
 const path2 = resolve(base, '2_parsed');
 const path4 = resolve(base, 'z_4_overview');
 
-fs.mkdirSync(path4, {recursive:true});
+fs.mkdirSync(path4, { recursive: true });
 
 const files0 = scanFolder(path0);
 const files2 = scanFolder(path2);
 
 (async () => {
 	console.log('   archived, not parsed');
-	minus(files0, files2).forEach(f => console.log('mv "'+relative(base, f.fullname)+'" "'+relative(base, path1)+'"'));
+	minus(files0, files2).forEach(f => console.log('mv "' + relative(base, f.fullname) + '" "' + relative(base, path1) + '"'));
 
 	console.log('   parsed, not archived');
-	minus(files2, files0).forEach(f => console.log('rm "'+relative(base, f.fullname)+'"'));
+	minus(files2, files0).forEach(f => console.log('rm "' + relative(base, f.fullname) + '"'));
 
 	console.log('   check sums in parsed');
 	await addSums(files2);
@@ -39,17 +39,17 @@ function scanFolder(path) {
 		let timestamp = filename.match(/\d\d\d\d-\d\d-\d\d-\d\d-\d\d/)[0];
 		if (!timestamp) throw Error();
 
-		let fullname = resolve(path,filename)
+		let fullname = resolve(path, filename)
 
 		return {
 			filename,
 			fullname,
 			timestamp,
-			day: timestamp.slice(0,10),
+			day: timestamp.slice(0, 10),
 			size: fs.statSync(fullname).size
 		}
 	})
-	files = files.sort((a,b) => a.filename < b.filename ? -1 : 1);
+	files = files.sort((a, b) => a.filename < b.filename ? -1 : 1);
 	return files;
 }
 
@@ -81,9 +81,9 @@ function sanityCheck(files) {
 			console.log('CHECK ERROR');
 			console.log(errors.join('\n'));
 			console.table([
-				{filename:  lastFilename, entryCount:  lastEntryCount, caseCount:  lastCaseCount},
-				{filename: file.filename, entryCount: file.entryCount, caseCount: file.caseCount},
-				{filename:        'diff', entryCount: file.entryCount-lastEntryCount, caseCount: file.caseCount-lastCaseCount}
+				{ filename:  lastFilename, entryCount:  lastEntryCount,                  caseCount: lastCaseCount },
+				{ filename: file.filename, entryCount: file.entryCount,                  caseCount: file.caseCount },
+				{ filename:        'diff', entryCount: file.entryCount - lastEntryCount, caseCount: file.caseCount - lastCaseCount }
 			])
 			noErrors = false;
 		}
@@ -104,11 +104,11 @@ async function addSums(files) {
 	}
 
 	async function getFileInfo(file) {
-		let cacheFile = resolve(path4, file.timestamp+'.json');
+		let cacheFile = resolve(path4, file.timestamp + '.json');
 
 		if (fs.existsSync(cacheFile)) return JSON.parse(fs.readFileSync(cacheFile))
 
-		console.log('      scan '+file.filename);
+		console.log('      scan ' + file.filename);
 
 		let entryCount = 0;
 		let caseCount = 0;
@@ -117,7 +117,7 @@ async function addSums(files) {
 			if (line.AnzahlFall > 0) caseCount += line.AnzahlFall;
 			entryCount++;
 		}
-		let data = {entryCount, caseCount};
+		let data = { entryCount, caseCount };
 		fs.writeFileSync(cacheFile, JSON.stringify(data))
 
 		return data;

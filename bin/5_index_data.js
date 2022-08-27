@@ -3,7 +3,7 @@
 "use strict"
 
 const fs = require('fs');
-const {resolve} = require('path');
+const { resolve } = require('path');
 
 const cloudUrl = 'https://storage.googleapis.com/brdata-public-data/rki-corona-archiv/';
 
@@ -20,9 +20,9 @@ function generateIndex(dir) {
 		if (stat.isDirectory()) return;
 		if (!f.endsWith('.xz')) return;
 		result.push({
-			url:cloudUrl+dir+'/'+f,
-			name:f,
-			size:Math.round(stat.size/1024).toString().replace(/\B(?=(\d{3})+(?!\d))/g, "'")+' KB',
+			url: cloudUrl + dir + '/' + f,
+			name: f,
+			size: Math.round(stat.size / 1024).toString().replace(/\B(?=(\d{3})+(?!\d))/g, "'") + ' KB',
 		});
 	})
 
@@ -30,8 +30,8 @@ function generateIndex(dir) {
 
 	fs.writeFileSync(resolve(fullDir, 'index.txt'), result.map(f => f.name).join('\n'));
 
-	let html = result.map(f => '<a href="'+f.url+'">'+f.name+'</a> '+f.size).join('<br>\n');
-	html = '<html><body style="font-family:monospace">'+html+'</body></html>';
+	let html = result.map(f => '<a href="' + f.url + '">' + f.name + '</a> ' + f.size).join('<br>\n');
+	html = '<html><body style="font-family:monospace">' + html + '</body></html>';
 
 	fs.writeFileSync(resolve(fullDir, 'index.html'), html);
 }

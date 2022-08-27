@@ -5,7 +5,7 @@ const fs = require('fs');
 const https = require('https');
 const zlib = require('zlib');
 
-var helper = module.exports = {	
+var helper = module.exports = {
 	bzip2, bunzip2,
 	fetch,
 	fetchRedirect,
@@ -19,7 +19,7 @@ var helper = module.exports = {
 }
 
 function logPercent() {
-	return slowDown(v => console.log((100*v).toFixed(1)));
+	return slowDown(v => console.log((100 * v).toFixed(1)));
 }
 
 function fetch(url) {
@@ -63,7 +63,7 @@ async function* lineGzipReader(filename, cb) {
 		let pos, lastPos = 0;
 		while ((pos = buffer.indexOf(10, lastPos)) >= 0) {
 			yield buffer.slice(lastPos, pos).toString();
-			lastPos = pos+1;
+			lastPos = pos + 1;
 		}
 		buffer = buffer.slice(lastPos);
 	}
@@ -74,7 +74,7 @@ function lineGzipWriter(filename) {
 	let finished = false;
 	let block = [], blockSize = 0;
 	let file = fs.createWriteStream(filename);
-	let gzip = zlib.createGzip({level:9});
+	let gzip = zlib.createGzip({ level: 9 });
 	gzip.pipe(file);
 
 	async function write(line) {
@@ -84,7 +84,7 @@ function lineGzipWriter(filename) {
 			await close();
 			finished = true;
 		} else {
-			block.push(line+'\n');
+			block.push(line + '\n');
 			blockSize += line.length;
 			if (blockSize > 1e5) await flush();
 		}
@@ -103,7 +103,7 @@ function lineGzipWriter(filename) {
 			gzip.end();
 		})
 	}
-	
+
 	return write;
 }
 
@@ -118,11 +118,11 @@ function bunzip2(bufIn) {
 
 function gzip(bufIn) {
 	if (typeof bufIn === 'string') bufIn = Buffer.from(bufIn, 'utf8');
-	return new Promise(res => zlib.gzip(bufIn, {level:9}, (err,bufOut) => res(bufOut)))
+	return new Promise(res => zlib.gzip(bufIn, { level: 9 }, (err, bufOut) => res(bufOut)))
 }
 
 function gunzip(bufIn) {
-	return new Promise(res => zlib.gunzip(bufIn, (err,bufOut) => res(bufOut)))
+	return new Promise(res => zlib.gunzip(bufIn, (err, bufOut) => res(bufOut)))
 }
 
 function xzip(bufIn) {
@@ -142,9 +142,9 @@ async function* lineXzipReader(filename) {
 	file.on('data', chunk => {
 		filepos += chunk.length;
 		let time = Date.now();
-		let p = filepos/filesize;
-		time = (time-time0)/p*(1-p);
-		process.stderr.write('\u001b[2K\r\t'+(100*p).toFixed(2)+'%\t'+(time/60000).toFixed(1)+'min')
+		let p = filepos / filesize;
+		time = (time - time0) / p * (1 - p);
+		process.stderr.write('\u001b[2K\r\t' + (100 * p).toFixed(2) + '%\t' + (time / 60000).toFixed(1) + 'min')
 	})
 	const xz = child_process.spawn('xz', ['-d']);
 	file.pipe(xz.stdin);
@@ -157,7 +157,7 @@ async function* lineXzipReader(filename) {
 		let pos, lastPos = 0;
 		while ((pos = buffer.indexOf(10, lastPos)) >= 0) {
 			yield buffer.slice(lastPos, pos).toString();
-			lastPos = pos+1;
+			lastPos = pos + 1;
 		}
 		buffer = buffer.slice(lastPos);
 	}
@@ -175,7 +175,7 @@ function lineXzipWriter(filename) {
 	async function write(line) {
 		if (finished) throw Error();
 
-		block.push(line+'\n');
+		block.push(line + '\n');
 		blockSize += line.length;
 		if (blockSize > 1e5) await flush();
 	}
@@ -198,8 +198,8 @@ function lineXzipWriter(filename) {
 			xz.stdin.end();
 		})
 	}
-	
-	return {write,close};
+
+	return { write, close };
 }
 
 function runCommand(cmd, args, bufIn) {
@@ -267,8 +267,8 @@ function encodeCSV(list) {
 	list.forEach(e => Object.keys(e).forEach(k => keys.add(k)));
 	keys = Array.from(keys.values());
 	list = list.map(e => keys.map(k => {
-		let v = ''+e[k];
-		return v.includes(',') ? '"'+v+'"' : v;
+		let v = '' + e[k];
+		return v.includes(',') ? '"' + v + '"' : v;
 	}).join(','));
 	list.unshift(keys.join(','));
 	return list.join('\n');

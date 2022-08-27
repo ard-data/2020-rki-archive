@@ -5,7 +5,7 @@
 const fs = require('fs');
 const helper = require('./lib/helper.js');
 const config = require('./lib/config.js');
-const {resolve, basename} = require('path');
+const { resolve, basename } = require('path');
 
 const pathIn  = resolve(__dirname, '../data/0_archived');
 const pathOut = resolve(__dirname, '../data/2_parsed');
@@ -14,7 +14,7 @@ let filesIn = fs.readdirSync(pathIn).filter(f => f.endsWith('.xz'));
 
 (async () => {
 	let xz;
-	
+
 	for (let fileIn of filesIn) {
 		let timestamp = fileIn.match(/\d\d\d\d-\d\d-\d\d-\d\d-\d\d/);
 		if (!timestamp) throw Error();
@@ -23,26 +23,26 @@ let filesIn = fs.readdirSync(pathIn).filter(f => f.endsWith('.xz'));
 
 		let filenameIn  = resolve(pathIn,  fileIn);
 		let filenameOut = resolve(pathOut, fileOut);
-		let filenameTmp = resolve(__dirname,'../tmp/'+(new Date()).toISOString()+'.tmp');
-		fs.mkdirSync(resolve(__dirname,'../tmp/'), {recursive:true});
+		let filenameTmp = resolve(__dirname, '../tmp/' + (new Date()).toISOString() + '.tmp');
+		fs.mkdirSync(resolve(__dirname, '../tmp/'), { recursive: true });
 
 		if (fs.existsSync(filenameOut)) continue;
 
-		console.log('parsing '+fileIn);
+		console.log('parsing ' + fileIn);
 
-		let type = fileIn.replace(timestamp,'?');
+		let type = fileIn.replace(timestamp, '?');
 		xz = helper.lineXzipWriter(filenameTmp);
 
 		switch (type) {
 			case '?_api_raw.json.xz':
 				await openJSONApiRaw(filenameIn, parseEntry);
-			break;
+				break;
 			case '?_api_raw.ndjson.xz':
 				await openNDJSONApiRaw(filenameIn, parseEntry);
-			break;
+				break;
 			case '?_dump.csv.xz':
 				await openCsvDump(filenameIn, parseEntry);
-			break;
+				break;
 			default: throw Error(`unknown type "${type}"`)
 		}
 
@@ -91,7 +91,7 @@ async function openCsvDump(filenameIn, cbEntry) {
 
 		let quoteCount = (line.match(/\"/g) || []).length;
 		if (quoteCount === 2) {
-			line = line.replace(/\".*\"/, t => t.replace(/[\",;]+/g,''));
+			line = line.replace(/\".*\"/, t => t.replace(/[\",;]+/g, ''));
 		} else if (quoteCount !== 0) throw Error(JSON.stringify(line));
 
 
@@ -135,7 +135,7 @@ async function openCsvDump(filenameIn, cbEntry) {
 			let Datenstand = basename(filename).slice(0, 10);
 			let landkreisLookup = fs.readFileSync(resolve(__dirname, '../data/landkreise.json'), 'utf8');
 			landkreisLookup = new Map(JSON.parse(landkreisLookup).map(l => [l.IdLandkreis, l]))
-			
+
 			return line => {
 				line = line.split(',');
 				if (line.length !== 12) {
@@ -181,7 +181,7 @@ async function openCsvDump(filenameIn, cbEntry) {
 
 function checkEntry(obj) {
 	let keyList = Object.keys(obj);
-	
+
 	let keysLookup = new Set(keyList);
 
 	keyList.forEach(key => {
@@ -189,16 +189,16 @@ function checkEntry(obj) {
 			delete obj[key];
 			return;
 		}
-		if (!config.checkField(key, obj[key])) error('field check failed: key "'+key+'", value "'+obj[key]+'"');
+		if (!config.checkField(key, obj[key])) error('field check failed: key "' + key + '", value "' + obj[key] + '"');
 	});
-	
+
 	config.mandatoryList.forEach(keyMandatory => {
-		if (!keysLookup.has(keyMandatory)) error('mandatory key missing: "'+keyMandatory+'" in Object "'+JSON.stringify(obj)+'"');
+		if (!keysLookup.has(keyMandatory)) error('mandatory key missing: "' + keyMandatory + '" in Object "' + JSON.stringify(obj) + '"');
 		keysLookup.delete(keyMandatory);
 	})
 
 	Array.from(keysLookup.keys()).forEach(key => {
-		if (!config.optionalSet.has(key)) error('key is not known: "'+key+'"');
+		if (!config.optionalSet.has(key)) error('key is not known: "' + key + '"');
 	})
 
 	function error(text) {
@@ -235,27 +235,27 @@ function cleanupDates(obj) {
 
 				if (/^\d\d\.\d\d\.20\d\d,? 00:00( Uhr)?$/.test(result)) {
 					result = result.split(/[^0-9]+/);
-					result = result[2]+'-'+result[1]+'-'+result[0]+'T00:00:00Z';
+					result = result[2] + '-' + result[1] + '-' + result[0] + 'T00:00:00Z';
 				}
 
 				if (/^20\d\d-\d\d-\d\d$/.test(result)) result += 'T00:00:00Z';
-				
+
 				if (/^20\d\d-\d\d-\d\d(T| )00:00:00(\.000)?(Z|\+00:00)$/.test(result)) {
 					result = Date.parse(result);
 					break;
 				}
 
-				throw Error('unknown date format "'+value+'" ('+result+')');
-			break;
+				throw Error('unknown date format "' + value + '" (' + result + ')');
+				break;
 			case 'number':
 				// range check
 				if (result < 1577836800000) throw Error();
 				if (result > Date.now()) throw Error();
-			break;
+				break;
 			default: throw Error(JSON.stringify(value));
 		}
 		result = new Date(result + 43200000);
 		result = result.toISOString();
-		return result.slice(0,10);
+		return result.slice(0, 10);
 	}
 }

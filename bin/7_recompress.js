@@ -32,23 +32,23 @@ function check(folder) {
 
 	// linear regression of file sizes
 	let sx = 0, sxx = 0, sxy = 0, sy = 0;
-	files.map((f,x) => {
+	files.map((f, x) => {
 		let y = f.size;
 		sx += x;
-		sxx += x*x;
-		sxy += x*y;
+		sxx += x * x;
+		sxy += x * y;
 		sy += y;
 	});
 
 	let n = files.length;
-	let w = n*sxx - sx*sx;
-	let a = (sy*sxx - sx*sxy)/w;
-	let b = ( n*sxy - sx*sy )/w;
+	let w = n * sxx - sx * sx;
+	let a = (sy * sxx - sx * sxy) / w;
+	let b = (n * sxy - sx * sy) / w;
 
-	files.forEach((f,x) => f.diff = f.size - (a + b*x));
+	files.forEach((f, x) => f.diff = f.size - (a + b * x));
 
 	// max diff
-	files.sort((a,b) => b.diff - a.diff);
+	files.sort((a, b) => b.diff - a.diff);
 	let worstFile = files[0];
 	//console.log('worst file diff', (worstFile.diff/1024).toFixed(0), 'KB');
 
@@ -63,7 +63,7 @@ function recompress(fullname) {
 	console.log('   recompress', fullname);
 
 	const tempFolder = resolve(__dirname, '../tmp');
-	fs.mkdirSync(tempFolder, { recursive:true })
+	fs.mkdirSync(tempFolder, { recursive: true })
 
 	const tempFullname = resolve(tempFolder, Math.random().toString(36).slice(2));
 

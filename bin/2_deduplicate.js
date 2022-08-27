@@ -10,7 +10,7 @@ const crypto = require('crypto');
 
 const dirSrc = resolve(__dirname, '../data/0_archived/');
 const hashCacheFilename = resolve(__dirname, '../tmp/hashes.json');
-fs.mkdirSync(dirname(hashCacheFilename), {recursive:true})
+fs.mkdirSync(dirname(hashCacheFilename), { recursive: true })
 let hashCache = new Map();
 if (fs.existsSync(hashCacheFilename)) hashCache = new Map(JSON.parse(fs.readFileSync(hashCacheFilename)));
 
@@ -21,7 +21,7 @@ fs.readdirSync(dirSrc).sort().forEach(filename => {
 
 
 	let fullname = resolve(dirSrc, filename);
-	let key = filename+':'+fs.statSync(fullname).size;
+	let key = filename + ':' + fs.statSync(fullname).size;
 
 	let hash;
 	if (hashCache.has(key)) {
@@ -34,7 +34,7 @@ fs.readdirSync(dirSrc).sort().forEach(filename => {
 	files.push({ fullname, hash });
 })
 
-files.sort((a,b) => a.hash.localeCompare(b.hash) || a.fullname.localeCompare(b.fullname));
+files.sort((a, b) => a.hash.localeCompare(b.hash) || a.fullname.localeCompare(b.fullname));
 
 let lastHash = false;
 files = files.filter(f => lastHash === (lastHash = f.hash));

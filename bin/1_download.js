@@ -4,17 +4,17 @@
 
 const fs = require('fs');
 const helper = require('./lib/helper.js');
-const {resolve} = require('path');
-const tempFolder = resolve(__dirname,'../tmp/');
+const { resolve } = require('path');
+const tempFolder = resolve(__dirname, '../tmp/');
 
 (async () => {
-	let date = (new Date()).toISOString().slice(0,16).replace(/[^0-9]/g,'-');
-	let filenameOut = resolve(__dirname,'../data/0_archived/'+date+'_dump.csv.xz');
-	fs.mkdirSync(tempFolder, {recursive:true});
+	let date = (new Date()).toISOString().slice(0, 16).replace(/[^0-9]/g, '-');
+	let filenameOut = resolve(__dirname, '../data/0_archived/' + date + '_dump.csv.xz');
+	fs.mkdirSync(tempFolder, { recursive: true });
 
 	//let filenameTmp = await scrapeAPI();
 	let filenameTmp = await downloadCSV();
-	
+
 	if (filenameTmp) {
 		// download completed
 		fs.renameSync(filenameTmp, filenameOut);
@@ -29,8 +29,8 @@ async function downloadCSV() {
 	let metadata = await helper.fetch('https://www.arcgis.com/sharing/rest/content/items/66876b81065340a4a48710b062319336?f=json');
 	metadata = JSON.parse(metadata);
 
-	console.log('   latest: '+(new Date(metadata.modified)).toISOString().slice(0,16))
-	let lockFilename = resolve(tempFolder, metadata.modified+'.lock');
+	console.log('   latest: ' + (new Date(metadata.modified)).toISOString().slice(0, 16))
+	let lockFilename = resolve(tempFolder, metadata.modified + '.lock');
 
 	if (fs.existsSync(lockFilename)) {
 		console.log('   already downloaded');
@@ -73,7 +73,7 @@ async function scrapeAPI() {
 		if (step % 5 === 0) process.stderr.write('·');
 		step++;
 
-		let url = 'https://services7.arcgis.com/mOBPykOjAyBO2ZKk/arcgis/rest/services/RKI_COVID19/FeatureServer/0/query?where=1%3D1&outFields=*&orderByFields=ObjectId%20ASC&resultOffset='+(page*pageSize)+'&resultRecordCount='+pageSize+'&f=json';
+		let url = 'https://services7.arcgis.com/mOBPykOjAyBO2ZKk/arcgis/rest/services/RKI_COVID19/FeatureServer/0/query?where=1%3D1&outFields=*&orderByFields=ObjectId%20ASC&resultOffset=' + (page * pageSize) + '&resultRecordCount=' + pageSize + '&f=json';
 		data = await helper.fetch(url);
 		try {
 			data = JSON.parse(data);
@@ -88,8 +88,8 @@ async function scrapeAPI() {
 		page++;
 	} while (data.exceededTransferLimit)
 
-	process.stderr.write(' '+count+'\n');
-	
+	process.stderr.write(' ' + count + '\n');
+
 	console.log('   close')
 	await xz.close();
 
@@ -97,5 +97,5 @@ async function scrapeAPI() {
 }
 
 function getTempFilename() {
-	return resolve(tempFolder, (new Date()).toISOString().replace(/[^0-9]+/g, '_')+'.tmp');
+	return resolve(tempFolder, (new Date()).toISOString().replace(/[^0-9]+/g, '_') + '.tmp');
 }
